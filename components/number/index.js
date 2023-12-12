@@ -1,6 +1,7 @@
 import { Tooltip } from '@material-tailwind/react'
 import _ from 'lodash'
 
+import { isNumber } from '../../lib/number'
 import { split, numberFormat } from '../../lib/utils'
 
 const LARGE_NUMBER_THRESHOLD = 1000
@@ -19,7 +20,7 @@ export default (
     className = 'whitespace-nowrap text-sm 3xl:text-xl font-semibold',
   },
 ) => {
-  const valid = !isNaN(value)
+  const valid = isNumber(value)
   let _value = ['string', 'number'].includes(typeof value) ? value.toString() : undefined
 
   if (typeof _value === 'string' && _value.includes(delimiter) && !_value.endsWith(delimiter)) {

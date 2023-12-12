@@ -27,40 +27,7 @@ import { THEME, PAGE_VISIBLE, TERMS_AGREED, IP_DATA, CHAINS_DATA, ASSETS_DATA, P
 
 export default ({ children, agreeToTermsUseModal = false }) => {
   const dispatch = useDispatch()
-  const {
-    preferences,
-    chains,
-    assets,
-    pool_assets,
-    gas_tokens_price,
-    ens,
-    router_asset_balances,
-    pools,
-    pools_daily_stats,
-    rpc_providers,
-    dev,
-    wallet,
-    balances,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        assets: state.assets,
-        pool_assets: state.pool_assets,
-        gas_tokens_price: state.gas_tokens_price,
-        ens: state.ens,
-        router_asset_balances: state.router_asset_balances,
-        pools: state.pools,
-        pools_daily_stats: state.pools_daily_stats,
-        rpc_providers: state.rpc_providers,
-        dev: state.dev,
-        wallet: state.wallet,
-        balances: state.balances,
-      }
-    ),
-    shallowEqual,
-  )
+  const { preferences, chains, assets, pool_assets, gas_tokens_price, ens, router_asset_balances, pools, pools_daily_stats, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, gas_tokens_price: state.gas_tokens_price, ens: state.ens, router_asset_balances: state.router_asset_balances, pools: state.pools, pools_daily_stats: state.pools_daily_stats, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme, page_visible, terms_agreed, ip_data } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }

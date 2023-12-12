@@ -114,30 +114,28 @@ export default () => {
               </span>
             </>
           )
-          return (
-            toArray(items).length > 0 ?
-              <div
-                key={i}
-                title={title}
-                onClick={() => setOpenMenu(d)}
-                className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between space-x-2.5 p-3.5"
-              >
-                <div className="flex items-center justify-start space-x-2.5">
-                  {item}
-                </div>
-                <BiChevronRight size={18} className="3xl:w-6 3xl:h-6 mt-0.5" />
-              </div> :
-              <a
-                key={i}
-                title={title}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-3.5"
-              >
+          return toArray(items).length > 0 ?
+            <div
+              key={i}
+              title={title}
+              onClick={() => setOpenMenu(d)}
+              className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between space-x-2.5 p-3.5"
+            >
+              <div className="flex items-center justify-start space-x-2.5">
                 {item}
-              </a>
-          )
+              </div>
+              <BiChevronRight size={18} className="3xl:w-6 3xl:h-6 mt-0.5" />
+            </div> :
+            <a
+              key={i}
+              title={title}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-3.5"
+            >
+              {item}
+            </a>
         })
       }
     </div>

@@ -37,24 +37,22 @@ export default ({ onClick }) => {
           </>
         )
         const className = `w-full ${selected ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'} ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-start space-x-2 3xl:space-x-2.5 p-2 3xl:p-3`
-        return (
-          disabled ?
-            <div
-              key={id}
-              title="Disabled"
-              className={className}
-            >
-              {item}
-            </div> :
-            <Wallet
-              key={id}
-              connectChainId={c.chain_id}
-              onSwitch={onClick}
-              className={className}
-            >
-              {item}
-            </Wallet>
-        )
+        return disabled ?
+          <div
+            key={id}
+            title="Disabled"
+            className={className}
+          >
+            {item}
+          </div> :
+          <Wallet
+            key={id}
+            connectChainId={c.chain_id}
+            onSwitch={onClick}
+            className={className}
+          >
+            {item}
+          </Wallet>
       })}
     </div>
   )

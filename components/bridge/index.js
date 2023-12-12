@@ -5,8 +5,8 @@ import { XTransferStatus, XTransferErrorStatus, encodeMultisendCall } from '@con
 import { PERMIT2_ADDRESS, AllowanceTransfer, MaxSigDeadline, MaxAllowanceExpiration } from '@uniswap/permit2-sdk'
 import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
-import { BigNumber, Contract, constants, utils } from 'ethers'
-const { AddressZero: ZeroAddress } = { ...constants }
+import { BigNumber, Contract, utils } from 'ethers'
+const { AddressZero: ZeroAddress, MaxUint256 } = { ...constants }
 const { getAddress } = { ...utils }
 import _ from 'lodash'
 import moment from 'moment'
@@ -33,7 +33,6 @@ import TimeSpent from '../time/timeSpent'
 import Wallet from '../wallet'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
-import SelectAssetChain from '../select/asset-chain'
 import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
@@ -59,7 +58,7 @@ const ALCHEMIX_GATEWAYS = {
   "1634886255": "0xd031Bd586CAAcd11e846c35D1a61dc543d4ee55D", // arb
 }
 
-export default ({ useAssetChain = false }) => {
+export default () => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
   const { theme } = { ...preferences }
@@ -71,7 +70,7 @@ export default ({ useAssetChain = false }) => {
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { provider, signer, address } = { ...wallet_data }
   const { balances_data } = { ...balances }
   const { latest_bumped_transfers_data } = { ...latest_bumped_transfers }
   const wallet_chain_id = wallet_data?.chain_id
@@ -96,7 +95,7 @@ export default ({ useAssetChain = false }) => {
   const [approveProcessing, setApproveProcessing] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
-  const [xcall, setXcall] = useState(null)
+  const [xcallData, setXcallData] = useState(null)
   const [calling, setCalling] = useState(null)
   const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
@@ -112,7 +111,7 @@ export default ({ useAssetChain = false }) => {
   const [displayReceiveNextInfo, setDisplayReceiveNextInfo] = useState(null)
   const [receiveNextInfoTimeout, setReceiveNextInfoTimeout] = useState(null)
 
-  // get bridge from path
+  // get [bridge] from path
   useEffect(
     () => {
       if (assets_data) {
@@ -121,6 +120,7 @@ export default ({ useAssetChain = false }) => {
         const params = getQueryParams(asPath)
         const { symbol, amount, receive_next } = { ...params }
         const isNextAsset = equalsIgnoreCase(receive_next?.toString(), 'true') ? true : equalsIgnoreCase(receive_next?.toString(), 'false') ? false : undefined
+
         if (path.includes('from-') && path.includes('to-')) {
           const paths = split(path.replace('/', ''), 'normal', '-')
           const sourceChain = paths[paths.indexOf('from') + 1]
@@ -195,7 +195,7 @@ export default ({ useAssetChain = false }) => {
     [chains_data, assets_data, sdk, asPath],
   )
 
-  // set bridge to path
+  // set [bridge] to path
   useEffect(
     () => {
       const params = {}
@@ -209,6 +209,7 @@ export default ({ useAssetChain = false }) => {
             params.asset = asset
           }
         }
+
         const destination_chain_data = getChainData(destination_chain, chains_data, { not_disabled: true })
         if (destination_chain_data) {
           const { chain_id } = { ...destination_chain_data }
@@ -217,6 +218,7 @@ export default ({ useAssetChain = false }) => {
             params.asset = asset
           }
         }
+
         if (params.source_chain && params.asset) {
           const { chain_id } = { ...source_chain_data }
           if (isNumber(amount) && !isZero(amount)) {
@@ -253,7 +255,7 @@ export default ({ useAssetChain = false }) => {
         params.source = source
       }
       if (send) {
-        call()
+        xcall()
       }
 
       if (Object.keys(params).length > 0) {
@@ -273,14 +275,14 @@ export default ({ useAssetChain = false }) => {
       const destination_chain_data = getChainData(destination_chain, chains_data)
       const { chain_id } = { ...destination_chain_data }
       const { contract_address, next_asset } = { ...destination_contract_data }
-      const destination_decimals = destination_contract_data?.decimals || 18
-      const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
+      const destinationDecimals = destination_contract_data?.decimals || 18
+      const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destinationDecimals)).map(d => Number(d) > 0 ? Number(d) : 0))
 
       setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount && !is_xERC20 : false, receiveLocal })
       setEstimateResponse(null)
       setEstimateFeesTrigger(moment().valueOf())
       setApproveResponse(null)
-      setXcall(null)
+      setXcallData(null)
       setCallResponse(null)
     },
     [sdk, address, bridge, send],
@@ -291,6 +293,8 @@ export default ({ useAssetChain = false }) => {
     () => {
       let { source_chain, destination_chain } = { ...bridge }
       const { id } = { ...getChainData(wallet_chain_id, chains_data) }
+
+      // set source chain = wallet connected chain
       if (id && asPath) {
         const params = getQueryParams(asPath)
         if (!(source_chain && destination_chain) && !equalsIgnoreCase(id, destination_chain)) {
@@ -303,6 +307,7 @@ export default ({ useAssetChain = false }) => {
         }
         getBalances(id)
       }
+
       if (Object.keys(bridge).length > 0 || asPath === '/') {
         source_chain = source_chain || getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: destination_chain })?.id
         const source_chain_data = getChainData(source_chain, chains_data)
@@ -329,6 +334,7 @@ export default ({ useAssetChain = false }) => {
           destination_chain = getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: source_chain })?.id
         }
       }
+
       if (Object.keys(bridge).length === 0) {
         setBridge({ ...bridge, source_chain, destination_chain })
       }
@@ -357,7 +363,7 @@ export default ({ useAssetChain = false }) => {
     () => {
       const getData = () => {
         const { status } = { ...approveResponse }
-        if (address && !xcall && !calling && status !== 'pending') {
+        if (address && !xcallData && !calling && status !== 'pending') {
           const { source_chain, destination_chain } = { ...bridge }
           getBalances(source_chain)
           getBalances(destination_chain)
@@ -375,7 +381,7 @@ export default ({ useAssetChain = false }) => {
   useEffect(
     () => {
       const update = () => {
-        if (estimateFeesTrigger && !(approving || approveResponse || xcall || calling || callResponse)) {
+        if (estimateFeesTrigger && !(approving || approveResponse || xcallData || calling || callResponse)) {
           estimateFees()
         }
       }
@@ -391,8 +397,8 @@ export default ({ useAssetChain = false }) => {
   useEffect(
     () => {
       const getData = async () => {
-        if (sdk && address && xcall) {
-          const { transfer_id, transactionHash } = { ...xcall }
+        if (sdk && address && xcallData) {
+          const { transfer_id, transactionHash } = { ...xcallData }
           if (!transfer_id && transactionHash) {
             let data
             try {
@@ -411,7 +417,7 @@ export default ({ useAssetChain = false }) => {
             if (status || error_status) {
               const { transfer_id } = { ...data }
               if (transfer_id) {
-                setXcall({ ...xcall, transfer_id })
+                setXcallData({ ...xcallData, transfer_id })
               }
               setLatestTransfers(
                 _.orderBy(
@@ -425,7 +431,7 @@ export default ({ useAssetChain = false }) => {
             }
             else if (data?.transfer_id) {
               const { transfer_id } = { ...data }
-              setXcall({ ...xcall, transfer_id })
+              setXcallData({ ...xcallData, transfer_id })
             }
           }
           else if (transfer_id) {
@@ -453,12 +459,7 @@ export default ({ useAssetChain = false }) => {
                   break
               }
               if (updated) {
-                setLatestTransfers(
-                  _.orderBy(
-                    _.uniqBy(_.concat(data, latestTransfers), 'xcall_transaction_hash'),
-                    ['xcall_timestamp'], ['desc'],
-                  )
-                )
+                setLatestTransfers(_.orderBy(_.uniqBy(_.concat(data, latestTransfers), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc']))
               }
               if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
                 reset('finish')
@@ -472,7 +473,7 @@ export default ({ useAssetChain = false }) => {
       const interval = setInterval(() => getData(), 0.125 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [sdk, address, xcall],
+    [sdk, address, xcallData],
   )
 
   // render latest transfer
@@ -534,6 +535,8 @@ export default ({ useAssetChain = false }) => {
     [assets_data, bridge],
   )
 
+  const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
+
   const reset = async origin => {
     const reset_bridge = !['address', 'user_rejected'].includes(origin)
     if (reset_bridge) {
@@ -541,7 +544,7 @@ export default ({ useAssetChain = false }) => {
       setEstimatedValues(null)
       setEstimateResponse(null)
       setIsApproveNeeded(undefined)
-      setXcall(null)
+      setXcallData(null)
     }
 
     if (origin !== 'finish' && reset_bridge) {
@@ -566,552 +569,6 @@ export default ({ useAssetChain = false }) => {
     const { source_chain, destination_chain } = { ...bridge }
     getBalances(source_chain)
     getBalances(destination_chain)
-  }
-
-  const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
-
-  const call = async (relayerFee = fees?.relayerFee) => {
-    setApproving(null)
-    setCalling(true)
-
-    let success = false
-    let failed = false
-    if (sdk) {
-      const { source_chain, destination_chain, asset, amount, receive_wrap } = { ...bridge }
-      let { symbol } = { ...bridge }
-      const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
-
-      const source_chain_data = getChainData(source_chain, chains_data)
-      const destination_chain_data = getChainData(destination_chain, chains_data)
-      const { native_token } = { ...source_chain_data }
-
-      const source_asset_data = getAssetData(asset, assets_data)
-      let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
-      const _source_contract_data = _.cloneDeep(source_contract_data)
-      // xERC20 asset
-      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
-        source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
-      }
-      // next asset
-      else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
-        source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
-      }
-      // native asset
-      else if (source_contract_data?.wrappable && symbol && [source_asset_data.symbol, native_token?.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1) {
-        source_contract_data = { ...source_contract_data, contract_address: ZeroAddress, symbol: source_asset_data.symbol, image: source_asset_data.image }
-      }
-      const destination_asset_data = getAssetData(asset, assets_data)
-      let destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-      const _destination_contract_data = _.cloneDeep(destination_contract_data)
-      // next asset
-      if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
-        destination_contract_data = { ...destination_contract_data, ...destination_contract_data.next_asset }
-      }
-      // native asset
-      else if (destination_contract_data?.wrappable && (!symbol || [destination_asset_data.symbol, destination_contract_data.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1)) {
-        if (!receive_wrap) {
-          destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
-        }
-      }
-      symbol = source_contract_data?.symbol || source_asset_data?.symbol
-      relayerFee = isNumber(relayerFee) && Number(relayerFee) > 0 ? relayerFee : (await _estimateFees())?.relayerFee
-
-      const source_decimals = source_contract_data?.decimals || 18
-      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
-      const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
-      const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayer_fee_decimals) : '0')).toString()
-      const source_domain = source_chain_data?.domain_id
-      const destination_domain = destination_chain_data?.domain_id
-
-      const xcallParams = {
-        origin: source_domain,
-        destination: destination_domain,
-        asset: source_contract_data?.contract_address,
-        to: to || address,
-        delegate: to || address,
-        amount: parseUnits(_amount, source_decimals),
-        slippage: ((isNumber(slippage) ? numberToFixed(slippage, 2) : DEFAULT_PERCENT_BRIDGE_SLIPPAGE) * 100).toString(),
-        receiveLocal: receiveLocal || false,
-        callData: callData || '0x',
-        [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayer_fee_decimals - 2), relayer_fee_decimals) : undefined,
-      }
-      console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
-
-      if (!xcallParams[relayerFeeField] && NETWORK !== 'testnet') {
-        setCallResponse({
-          status: 'failed',
-          message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
-          code: XTransferErrorStatus.LowRelayerFee,
-        })
-        failed = true
-      }
-
-      // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
-      if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
-        let amountToApprove
-        try {
-          amountToApprove = parseUnits(amount, source_decimals)
-          console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
-
-          const request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, amountToApprove, infiniteApprove)
-          if (request) {
-            setApproving(true)
-            const response = await signer.sendTransaction(request)
-            const { hash } = { ...response }
-            setApproveResponse({
-              status: 'pending',
-              message: `Waiting for ${symbol} approval`,
-              tx_hash: hash,
-            })
-
-            setApproveProcessing(true)
-            const receipt = await signer.provider.waitForTransaction(hash)
-            const { status } = { ...receipt }
-            failed = !status
-            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
-            setApproveProcessing(false)
-          }
-          setApproving(false)
-        } catch (error) {
-          const response = parseError(error)
-          console.log('[/]', '[approveIfNeeded error before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove }, error, response)
-          const { code } = { ...response }
-          switch (code) {
-            case 'user_rejected':
-              reset(code)
-              break
-            default:
-              setApproveResponse({ status: 'failed', ...response })
-              break
-          }
-          setApproveProcessing(false)
-          setApproving(false)
-          failed = !success
-        }
-      }
-
-      if (!failed) {
-        const isWrapNative = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) || (source_contract_data?.wrappable && !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX))) && NATIVE_WRAPPABLE_SYMBOLS.includes(source_asset_data?.symbol)
-        try {
-          if (isWrapNative) {
-            xcallParams.asset = _source_contract_data?.contract_address
-            xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === ZeroAddress
-            // use the native asset as the relayer fee instead of wrapping
-            xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset
-            xcallParams.relayerFeeInTransactingAsset = '0'
-          }
-
-          // Track current step and total steps the user will need to take
-          let currentStep = 1
-          let totalSteps = 0
-
-          // Alchemix assets are handled differently
-          if (source_asset_data?.is_alchemix) {
-            console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
-            const gateway = ALCHEMIX_GATEWAYS[destination_domain];
-            const alAssetInterface = new utils.Interface([
-              "function exchangeOldForCanonical(address bridgeTokenAddress, uint256 tokenAmount)",
-              "function exchangeCanonicalForOld(address bridgeTokenAddress, uint256 tokenAmount)",
-            ]);
-
-            // Source is Ethereum
-            if (source_domain === '6648936' || source_domain === '1735353714') { 
-              // xcall the gateway on destination
-              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-              xcallParams.to = gateway
-            // Source is L2
-            } else {
-              const alAsset = xcallParams.asset
-              const nextAlAsset = source_contract_data?.next_asset?.contract_address
-
-              // exchange AlAsset into nextAlAsset on origin
-              if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
-                console.log('exchanging alAsset to nextAlAsset')
-                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
-                const exchangeTxRequest = {
-                  to: alAsset,
-                  data: exchangeData,
-                  from: address,
-                  chainId: source_chain_data?.chain_id
-                }
-                const exchangeTxReceipt = await signer.sendTransaction(exchangeTxRequest)
-                await exchangeTxReceipt.wait()
-              }
-
-              // approve nextAlAsset
-              console.log('checking approve nextAlAsset')
-              const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
-              if (approveTxRequest) {
-                console.log('approving nextAlAsset')
-                const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
-                await approveTxReceipt.wait()
-              }
-
-              // set xcall asset to nextAlAsset
-              xcallParams.asset = nextAlAsset
-
-              // Destination is L2
-              console.log(`receive local: ${receiveLocal}`)
-              if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
-                // xcall the gateway on destination
-                xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-                xcallParams.to = gateway
-              }
-            }
-          }
-
-          // Lockbox handling for xERC20s
-          const txs = []
-          const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, "multisend");
-          if (source_asset_data?.is_xERC20) {
-            if (!(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
-              console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
-
-              // Lockbox exists on source domain, must deposit
-              if (source_contract_data?.lockbox) {
-                const lockboxInterface = new utils.Interface([
-                  "function deposit(uint256 _amount)",
-                  "function depositWithPermitAllowance(uint256 _amount, address _owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
-                  "function withdraw(uint256 _amount)",
-                ]);
-                const erc20Interface = new utils.Interface([
-                  "function approve(address spender, uint256 amount)",
-                  "function transferFrom(address from, address to, uint256 amount)",
-                  "function allowance(address owner, address spender) view returns (uint256)",
-                ]);
-                const permit2Interface = new utils.Interface([
-                  "function permit(address owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
-                  "function transferFrom(address from, address to, uint160 amount, address token)",
-                  "function allowance(address, address, address) view returns (uint160 amount, uint48 expiration, uint48 nonce)",
-                ]);
-
-                const erc20 = new Contract(xcallParams.asset, erc20Interface, signer);
-                const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer);
-                const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer);
-                const connext = await sdk.sdkBase.getConnext(source_domain);
-
-                const allowances = [
-                  erc20.allowance(address, PERMIT2_ADDRESS),
-                  erc20.allowance(address, source_contract_data?.lockbox),
-                  xerc20.allowance(address, PERMIT2_ADDRESS),
-                  xerc20.allowance(address, connext.address),
-                  permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
-                  permit2.allowance(address, xerc20.address, multisendContract)
-                ]
-                const [
-                  erc20AllowancePermit,
-                  erc20AllowanceLockbox,
-                  xerc20AllowancePermit,
-                  xerc20AllowanceConnext,
-                  [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce], 
-                  [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
-                ] = await Promise.all(allowances)
-
-                if (source_contract_data?.permit_supported) {
-                  // Start with 2 permit steps and 1 step for final multcall
-                  totalSteps = 3
-                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
-                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
-
-                  // EOA approves ERC20 to permit2 if needed
-                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
-                    setApproving(true)
-                    setApproveResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to permit2`,
-                    })
-                    const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                    setApproveProcessing(true)
-                    setApproveResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Waiting for ERC20 to permit2 approval`,
-                    })
-                    await approvePermit2Erc20TxRequest.wait()
-                    currentStep += 1
-                    setApproveResponse(null)
-                    setApproveProcessing(false)
-                    setApproving(false)
-                  }
-
-                  // EOA approves XERC20 to permit2 if needed
-                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
-                    setApproving(true)
-                    setApproveResponse({
-                      status: 'pending',
-                      message: 'Please approve xERC20 to permit2',
-                    })
-                    const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                    setApproveProcessing(true)
-                    setApproveResponse({
-                      status: 'pending',
-                      message: 'Waiting for xERC20 to permit2 approval',
-                    })
-                    await approveMultisendXerc20TxRequest.wait()
-                    currentStep += 1
-                    setApproveResponse(null)
-                    setApproveProcessing(false)
-                    setApproving(false)
-                  }
-
-                  // Create permit for Lockbox
-                  if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
-                    const permit = {
-                      details: {
-                        token: erc20.address,
-                        amount: xcallParams.amount,
-                        expiration: MaxAllowanceExpiration,
-                        nonce: lockboxPermitNonce
-                      },
-                      spender: source_contract_data?.lockbox,
-                      sigDeadline: MaxSigDeadline
-                    }
-
-                    const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                    const signature = await signer._signTypedData(domain, types, values)
-                    currentStep += 1
-
-                    // Add transaction to call `depositWithPermitAllowance` on Lockbox
-                    const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
-                    const depositWithPermitAllowanceTxRequest = {
-                      to: source_contract_data?.lockbox,
-                      data: depositWithPermitAllowanceData,
-                      chainId: source_chain_data?.chain_id
-                    }
-                    txs.push(depositWithPermitAllowanceTxRequest)
-                  }
-
-                  // Create permit for Multisend
-                  if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
-                    const permitMultisend = {
-                      details: {
-                        token: xerc20.address,
-                        amount: xcallParams.amount,
-                        expiration: MaxAllowanceExpiration,
-                        nonce: multisendPermitNonce
-                      },
-                      spender: multisendContract,
-                      sigDeadline: MaxSigDeadline
-                    }
-
-                    const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                    const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
-                    currentStep += 1
-
-                    // Add transaction to call `permit` on Permit2
-                    const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
-                    const permitMultisendTxRequest = {
-                      to: PERMIT2_ADDRESS,
-                      data: permitMultisendData,
-                      chainId: source_chain_data?.chain_id
-                    }
-                    txs.push(permitMultisendTxRequest)
-                  }
-
-                  // Add transaction to `transferFrom` from user to Multisend using Permit2
-                  const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
-                  const transferFromTxRequest = {
-                    to: PERMIT2_ADDRESS,
-                    data: transferFromData,
-                    chainId: source_chain_data?.chain_id,
-                  }
-                  txs.push(transferFromTxRequest)
-
-                  // Add transaction to approve xERC20 spend to Connext
-                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
-                  if (approveXERC20TxRequest) {
-                    txs.push(approveXERC20TxRequest)
-                  }
-                } else {
-                  // Start with 1 step for deposit and 1 step for final xcall
-                  totalSteps = 2
-                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
-                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
-
-                  // Approve ERC20 spend to Lockbox
-                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
-                    setCallResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to Lockbox`,
-                    })
-                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
-                    setCallResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Approving ERC20 to Lockbox`,
-                    })
-                    await approveLockboxERC20TxRequest.wait()
-                    currentStep += 1
-                  }
-
-                  // Deposit into Lockbox
-                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? constants.MaxUint256 : xcallParams.amount])
-                  const depositTxRequest = {
-                    to: source_contract_data?.lockbox,
-                    data: depositData,
-                    chainId: source_chain_data?.chain_id
-                  }
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Please deposit into Lockbox`,
-                  })
-                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
-                  })
-                  await depositTxReceipt.wait()
-                  getBalances(source_chain)
-                  currentStep += 1
-
-                  // Approve xERC20 spend to Connext
-                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
-                  if (approveXERC20TxRequest) {
-                    setCallResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Please approve xERC20 to Connext`,
-                    })
-                    const approveXERC20TxReceipt = await signer.sendTransaction(approveXERC20TxRequest)
-                    setCallResponse({
-                      status: 'pending',
-                      message: `(${currentStep}/${totalSteps}) Approving xERC20 to Connext`,
-                    })
-                    await approveXERC20TxReceipt.wait()
-                    currentStep += 1
-                  }
-                }
-
-                // Set xcall asset to xERC20
-                xcallParams.asset = xerc20.address
-              }
-            }
-
-            // Lockbox exists on destination domain, must withdraw through adapter
-            if (destination_contract_data?.lockbox && destination_contract_data?.lockbox_adapter) {
-              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-              xcallParams.to = destination_contract_data?.lockbox_adapter
-            }
-          }
-
-          const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
-          if (CANONICAL_ASSET_SYMBOL && destination_chain_data?.native_token?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
-            xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
-          }
-
-          console.log('[/]', '[xcall]', { xcallParams })
-          let request = await sdk.sdkBase.xcall(xcallParams)
-          setCallResponse({
-            status: 'pending',
-            message: `${totalSteps ? `(${currentStep}/${totalSteps}) ` : ''}Please send the bridge transaction`,
-          })
-          if (request) {
-            if (txs && txs.length > 0) {
-              txs.push(request)
-              request = {
-                to: multisendContract,
-                data: encodeMultisendCall(txs),
-                value: xcallParams[relayerFeeField], 
-                // from: address,
-                chainId: source_chain_data?.chain_id,
-              };
-            }
-
-            try {
-              const gasLimit = await signer.estimateGas(request)
-              if (gasLimit) {
-                request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
-              }
-            } catch (error) {}
-            const response = await signer.sendTransaction(request)
-            const { hash } = { ...response }
-
-            setCallProcessing(true)
-            setCallResponse(null)
-            const receipt = await signer.provider.waitForTransaction(hash)
-            const { transactionHash, status } = { ...receipt }
-            failed = !status
-            setXcall(receipt)
-            setCallResponse({
-              status: failed ? 'failed' : 'success',
-              message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. (It's ok to close the browser)`,
-              tx_hash: hash,
-            })
-            success = true
-
-            if (!failed) {
-              try {
-                const destination_transacting_asset = (receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset?.contract_address ? destination_contract_data.next_asset.contract_address : destination_contract_data?.contract_address
-                const destination_decimals = (destination_contract_data?.next_asset && equalsIgnoreCase(destination_transacting_asset, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_contract_data?.decimals) || 18
-                setLatestTransfers(
-                  _.orderBy(
-                    _.uniqBy(
-                      _.concat(
-                        {
-                          xcall_transaction_hash: transactionHash || hash,
-                          xcall_timestamp:  moment().unix(),
-                          origin_chain: source_chain_data?.chain_id,
-                          origin_domain: xcallParams.origin,
-                          origin_transacting_asset: xcallParams.asset,
-                          origin_transacting_amount: Number(parseUnits(amount, source_decimals)),
-                          destination_chain: destination_chain_data?.chain_id,
-                          destination_domain: xcallParams.destination,
-                          destination_transacting_asset,
-                          destination_transacting_amount: estimatedValues?.amountReceived ? parseUnits(estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? relayerFee : 0), destination_decimals) : undefined,
-                          to: xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : xcallParams.to,
-                          force_slow: forceSlow,
-                          receive_local: receiveLocal || estimatedValues?.isNextAsset,
-                        },
-                        latestTransfers,
-                      ),
-                      'xcall_transaction_hash',
-                    ),
-                    ['xcall_timestamp'], ['desc'],
-                  )
-                )
-                setOpenTransferStatus(true)
-              } catch (error) {
-                console.log('[/]', '[xcall setLatestTransfers error]', { xcallParams }, error)
-              }
-            }
-          }
-        } catch (error) {
-          const response = parseError(error)
-          console.log('[/]', '[xcall error]', { xcallParams }, error)
-          const { code } = { ...response }
-          let { message } = { ...response }
-          if (message?.includes('insufficient funds for gas')) {
-            message = 'Insufficient gas for the destination gas fee.'
-          }
-          switch (code) {
-            case 'user_rejected':
-              reset(code)
-              break
-            default:
-              setCallResponse({ status: 'failed', ...response, message })
-              break
-          }
-          failed = !success
-        }
-      }
-    }
-
-    if (failed) {
-      setXcall(null)
-    }
-    setCallProcessing(false)
-    setCalling(false)
-
-    if (sdk && address && success) {
-      await sleep(1 * 1000)
-      setBalanceTrigger(moment().valueOf())
-      setTransfersTrigger(moment().valueOf())
-    }
   }
 
   const checkSupported = () => {
@@ -1166,9 +623,9 @@ export default ({ useAssetChain = false }) => {
         const source_asset_data = getAssetData(asset, assets_data)
         const { contracts, price } = { ...source_asset_data }
         const source_contract_data = getContractData(source_chain_data.chain_id, contracts)
-        const source_decimals = source_contract_data.decimals || 18
+        const sourceDecimals = source_contract_data.decimals || 18
 
-        const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, source_decimals))
+        const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, sourceDecimals))
         const params = {
           originDomain: source_chain_data.domain_id,
           destinationDomain: destination_chain_data.domain_id,
@@ -1176,6 +633,7 @@ export default ({ useAssetChain = false }) => {
           priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
           destinationGasPrice: gas_price,
         }
+
         if (NETWORK !== 'mainnet') {
           const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
           const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
@@ -1186,6 +644,7 @@ export default ({ useAssetChain = false }) => {
             params.destinationNativeTokenPrice = destination_gas_token_data.price
           }
         }
+
         try {
           console.log('[/]', '[estimateRelayerFee]', params)
           const response = await sdk.sdkBase.estimateRelayerFee(params)
@@ -1208,7 +667,7 @@ export default ({ useAssetChain = false }) => {
   }
 
   const estimateFees = async () => {
-    if (sdk && !xcall && !callResponse) {
+    if (sdk && !xcallData && !callResponse) {
       if (checkSupported()) {
         setFees(null)
         setApproveResponse(null)
@@ -1227,15 +686,15 @@ export default ({ useAssetChain = false }) => {
     if (sdk) {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
-      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? _source_contract_data : source_contract_data)?.contract_address
+      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? original_source_contract_data : source_contract_data)?.contract_address
 
-      const { contract_address, next_asset } = { ..._destination_contract_data }
+      const { contract_address, next_asset } = { ...original_destination_contract_data }
       let destinationTokenAddress = contract_address
       const isNextAsset = typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, next_asset?.contract_address)
       destinationTokenAddress = isNextAsset && next_asset?.contract_address ? next_asset.contract_address : destinationTokenAddress
 
-      const source_decimals = source_contract_data?.decimals || 18
-      const amount = parseUnits(_amount, source_decimals)
+      const sourceDecimals = source_contract_data?.decimals || 18
+      const amount = parseUnits(_amount, sourceDecimals)
       const checkFastLiquidity = true
 
       let manual = true
@@ -1244,10 +703,10 @@ export default ({ useAssetChain = false }) => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if ((NETWORK === 'testnet' && ['linea'].includes(destination_chain_data?.id)) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
+          if (source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
             manual = true
           }
-          else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
+          else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(id => toArray(pools_data).find(d => d.chain_data?.id === id && !d.tvl)) < 0) {
             const startTime = moment()
             console.log('[/]', '[calculateAmountReceived]', { startTime: startTime.format(), originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
             const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, checkFastLiquidity)
@@ -1269,7 +728,7 @@ export default ({ useAssetChain = false }) => {
                       break
                     default:
                       if (typeof v !== 'boolean') {
-                        v = formatUnits(v, source_decimals)
+                        v = formatUnits(v, sourceDecimals)
                       }
                       break
                   }
@@ -1294,9 +753,558 @@ export default ({ useAssetChain = false }) => {
       }
 
       if (manual) {
-        const routerFee = parseFloat(numberToFixed(_amount * PERCENT_ROUTER_FEE / 100, source_decimals))
+        const routerFee = parseFloat(numberToFixed(_amount * PERCENT_ROUTER_FEE / 100, sourceDecimals))
         setEstimatedValues({ amountReceived: toFixedNumber(_amount).subUnsafe(toFixedNumber(routerFee)).toString(), routerFee, isNextAsset: typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal })
       }
+    }
+  }
+
+  const xcall = async (relayerFee = fees?.relayerFee) => {
+    setApproving(null)
+    setCalling(true)
+
+    let success = false
+    let failed = false
+    if (sdk) {
+      const { source_chain, destination_chain, asset, amount, receive_wrap } = { ...bridge }
+      let { symbol } = { ...bridge }
+      const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
+
+      const source_chain_data = getChainData(source_chain, chains_data)
+      const destination_chain_data = getChainData(destination_chain, chains_data)
+      const { native_token } = { ...source_chain_data }
+      const source_domain = source_chain_data?.domain_id
+      const destination_domain = destination_chain_data?.domain_id
+
+      const source_asset_data = getAssetData(asset, assets_data)
+      let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
+      const original_source_contract_data = _.cloneDeep(source_contract_data)
+      if (symbol) {
+        // xERC20 asset
+        if (source_asset_data?.is_xERC20 && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+          source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+        }
+        // next asset
+        else if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+          source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
+        }
+        // native asset
+        else if (source_contract_data?.wrappable && [source_asset_data.symbol, native_token?.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1) {
+          source_contract_data = { ...source_contract_data, contract_address: ZeroAddress, symbol: source_asset_data.symbol, image: source_asset_data.image }
+        }
+      }
+
+      const destination_asset_data = getAssetData(asset, assets_data)
+      let destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
+      // next asset
+      if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
+        destination_contract_data = { ...destination_contract_data, ...destination_contract_data.next_asset }
+      }
+      // native asset
+      else if (destination_contract_data?.wrappable && (!symbol || [destination_asset_data.symbol, destination_contract_data.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1)) {
+        if (!receive_wrap) {
+          destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
+        }
+      }
+
+      symbol = source_contract_data?.symbol || source_asset_data?.symbol
+      relayerFee = isNumber(relayerFee) && Number(relayerFee) > 0 ? relayerFee : (await _estimateFees())?.relayerFee
+
+      const sourceDecimals = source_contract_data?.decimals || 18
+      const relayerFeeDecimals = relayerFeeAssetType === 'transacting' ? sourceDecimals : 18
+      const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
+      const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
+
+      const xcallParams = {
+        origin: source_domain,
+        destination: destination_domain,
+        asset: source_contract_data?.contract_address,
+        to: to || address,
+        delegate: to || address,
+        amount: parseUnits(_amount, sourceDecimals),
+        slippage: ((isNumber(slippage) ? numberToFixed(slippage, 2) : DEFAULT_PERCENT_BRIDGE_SLIPPAGE) * 100).toString(),
+        receiveLocal: receiveLocal || false,
+        callData: callData || '0x',
+        [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayerFeeDecimals - 2), relayerFeeDecimals) : undefined,
+      }
+      console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+
+      if (!xcallParams[relayerFeeField] && NETWORK !== 'testnet') {
+        setCallResponse({
+          status: 'failed',
+          message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
+          code: XTransferErrorStatus.LowRelayerFee,
+        })
+        failed = true
+      }
+
+      // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
+      if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
+        let amountToApprove
+        try {
+          amountToApprove = parseUnits(amount, sourceDecimals)
+          console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
+
+          const request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, amountToApprove, infiniteApprove)
+          if (request) {
+            setApproving(true)
+            const response = await signer.sendTransaction(request)
+            const { hash } = { ...response }
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${symbol} approval`,
+              tx_hash: hash,
+            })
+
+            setApproveProcessing(true)
+            const receipt = await signer.provider.waitForTransaction(hash)
+            const { status } = { ...receipt }
+            failed = !status
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
+            setApproveProcessing(false)
+          }
+          setApproving(false)
+        } catch (error) {
+          const response = parseError(error)
+          console.log('[/]', '[approveIfNeeded error before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove }, error, response)
+          const { code } = { ...response }
+          switch (code) {
+            case 'user_rejected':
+              reset(code)
+              break
+            default:
+              setApproveResponse({ status: 'failed', ...response })
+              break
+          }
+          setApproveProcessing(false)
+          setApproving(false)
+          failed = !success
+        }
+      }
+
+      if (!failed) {
+        const isWrapNative = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) || (source_contract_data?.wrappable && !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX))) && NATIVE_WRAPPABLE_SYMBOLS.includes(source_asset_data?.symbol)
+        try {
+          if (isWrapNative) {
+            xcallParams.asset = original_source_contract_data?.contract_address
+            xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === ZeroAddress
+            // use the native asset as the relayer fee instead of wrapping
+            xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset
+            xcallParams.relayerFeeInTransactingAsset = '0'
+          }
+
+          // Track current step and total steps the user will need to take
+          let currentStep = 1
+          let totalSteps = 0
+
+          // Alchemix assets are handled differently
+          if (source_asset_data?.is_alchemix) {
+            console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+            const gateway = ALCHEMIX_GATEWAYS[destination_domain]
+            const alAssetInterface = new utils.Interface([
+              'function exchangeOldForCanonical(address bridgeTokenAddress, uint256 tokenAmount)',
+              'function exchangeCanonicalForOld(address bridgeTokenAddress, uint256 tokenAmount)',
+            ])
+
+            // Source is Ethereum
+            if (['6648936', '1735353714'].includes(source_domain)) {
+              // xcall the gateway on destination
+              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to])
+              xcallParams.to = gateway
+            // Source is L2
+            }
+            else {
+              const alAsset = xcallParams.asset
+              const nextAlAsset = source_contract_data?.next_asset?.contract_address
+
+              // exchange AlAsset into nextAlAsset on origin
+              if (equalsIgnoreCase(xcallParams.asset, original_source_contract_data?.contract_address)) {
+                console.log('exchanging alAsset to nextAlAsset')
+                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
+                const exchangeTxRequest = {
+                  to: alAsset,
+                  data: exchangeData,
+                  from: address,
+                  chainId: source_chain_data?.chain_id,
+                }
+                const exchangeTxReceipt = await signer.sendTransaction(exchangeTxRequest)
+                await exchangeTxReceipt.wait()
+              }
+
+              // approve nextAlAsset
+              console.log('checking approve nextAlAsset')
+              const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
+              if (approveTxRequest) {
+                console.log('approving nextAlAsset')
+                const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
+                await approveTxReceipt.wait()
+              }
+
+              // set xcall asset to nextAlAsset
+              xcallParams.asset = nextAlAsset
+
+              // Destination is L2
+              console.log(`receive local: ${receiveLocal}`)
+              if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
+                // xcall the gateway on destination
+                xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to])
+                xcallParams.to = gateway
+              }
+            }
+          }
+
+          // Lockbox handling for xERC20s
+          const txs = []
+          const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, 'multisend')
+
+          if (source_asset_data?.is_xERC20) {
+            if (!(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
+              console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+              // Lockbox exists on source domain, must deposit
+              if (source_contract_data?.lockbox) {
+                const lockboxInterface = new utils.Interface([
+                  'function deposit(uint256 _amount)',
+                  'function depositWithPermitAllowance(uint256 _amount, address _owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)',
+                  'function withdraw(uint256 _amount)',
+                ])
+                const erc20Interface = new utils.Interface([
+                  'function approve(address spender, uint256 amount)',
+                  'function transferFrom(address from, address to, uint256 amount)',
+                  'function allowance(address owner, address spender) view returns (uint256)',
+                ])
+                const permit2Interface = new utils.Interface([
+                  'function permit(address owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)',
+                  'function transferFrom(address from, address to, uint160 amount, address token)',
+                  'function allowance(address, address, address) view returns (uint160 amount, uint48 expiration, uint48 nonce)',
+                ])
+
+                const erc20 = new Contract(xcallParams.asset, erc20Interface, signer)
+                const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer)
+                const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer)
+                const connext = await sdk.sdkBase.getConnext(source_domain)
+
+                const allowances = [
+                  erc20.allowance(address, PERMIT2_ADDRESS),
+                  erc20.allowance(address, source_contract_data?.lockbox),
+                  xerc20.allowance(address, PERMIT2_ADDRESS),
+                  xerc20.allowance(address, connext.address),
+                  permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
+                  permit2.allowance(address, xerc20.address, multisendContract),
+                ]
+                const [
+                  erc20AllowancePermit,
+                  erc20AllowanceLockbox,
+                  xerc20AllowancePermit,
+                  xerc20AllowanceConnext,
+                  [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce],
+                  [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce],
+                ] = await Promise.all(allowances)
+
+                if (source_contract_data?.permit_supported) {
+                  // Start with 2 permit steps and 1 step for final multcall
+                  totalSteps = 3
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+
+                  // EOA approves ERC20 to permit2 if needed
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to permit2`,
+                    })
+                    const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, MaxUint256)
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Waiting for ERC20 to permit2 approval`,
+                    })
+                    await approvePermit2Erc20TxRequest.wait()
+                    currentStep += 1
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
+                  }
+
+                  // EOA approves XERC20 to permit2 if needed
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Please approve xERC20 to permit2',
+                    })
+                    const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, MaxUint256)
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Waiting for xERC20 to permit2 approval',
+                    })
+                    await approveMultisendXerc20TxRequest.wait()
+                    currentStep += 1
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
+                  }
+
+                  // Create permit for Lockbox
+                  if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
+                    const permit = {
+                      details: {
+                        token: erc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: lockboxPermitNonce
+                      },
+                      spender: source_contract_data?.lockbox,
+                      sigDeadline: MaxSigDeadline,
+                    }
+
+                    const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signature = await signer._signTypedData(domain, types, values)
+                    currentStep += 1
+
+                    // Add transaction to call `depositWithPermitAllowance` on Lockbox
+                    const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
+                    const depositWithPermitAllowanceTxRequest = {
+                      to: source_contract_data?.lockbox,
+                      data: depositWithPermitAllowanceData,
+                      chainId: source_chain_data?.chain_id,
+                    }
+                    txs.push(depositWithPermitAllowanceTxRequest)
+                  }
+
+                  // Create permit for Multisend
+                  if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
+                    const permitMultisend = {
+                      details: {
+                        token: xerc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: multisendPermitNonce,
+                      },
+                      spender: multisendContract,
+                      sigDeadline: MaxSigDeadline,
+                    }
+
+                    const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
+                    currentStep += 1
+
+                    // Add transaction to call `permit` on Permit2
+                    const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
+                    const permitMultisendTxRequest = {
+                      to: PERMIT2_ADDRESS,
+                      data: permitMultisendData,
+                      chainId: source_chain_data?.chain_id,
+                    }
+                    txs.push(permitMultisendTxRequest)
+                  }
+
+                  // Add transaction to `transferFrom` from user to Multisend using Permit2
+                  const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
+                  const transferFromTxRequest = {
+                    to: PERMIT2_ADDRESS,
+                    data: transferFromData,
+                    chainId: source_chain_data?.chain_id,
+                  }
+                  txs.push(transferFromTxRequest)
+
+                  // Add transaction to approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, { signerAddress: multisendContract })
+                  if (approveXERC20TxRequest) {
+                    txs.push(approveXERC20TxRequest)
+                  }
+                }
+                else {
+                  // Start with 1 step for deposit and 1 step for final xcall
+                  totalSteps = 2
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+
+                  // Approve ERC20 spend to Lockbox
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to Lockbox`,
+                    })
+                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? MaxUint256 : xcallParams.amount)
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Approving ERC20 to Lockbox`,
+                    })
+                    await approveLockboxERC20TxRequest.wait()
+                    currentStep += 1
+                  }
+
+                  // Deposit into Lockbox
+                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? MaxUint256 : xcallParams.amount])
+                  const depositTxRequest = {
+                    to: source_contract_data?.lockbox,
+                    data: depositData,
+                    chainId: source_chain_data?.chain_id,
+                  }
+                  setCallResponse({
+                    status: 'pending',
+                    message: `(${currentStep}/${totalSteps}) Please deposit into Lockbox`,
+                  })
+                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
+                  setCallResponse({
+                    status: 'pending',
+                    message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
+                  })
+                  await depositTxReceipt.wait()
+                  getBalances(source_chain)
+                  currentStep += 1
+
+                  // Approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
+                  if (approveXERC20TxRequest) {
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve xERC20 to Connext`,
+                    })
+                    const approveXERC20TxReceipt = await signer.sendTransaction(approveXERC20TxRequest)
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Approving xERC20 to Connext`,
+                    })
+                    await approveXERC20TxReceipt.wait()
+                    currentStep += 1
+                  }
+                }
+
+                // Set xcall asset to xERC20
+                xcallParams.asset = xerc20.address
+              }
+            }
+
+            // Lockbox exists on destination domain, must withdraw through adapter
+            if (destination_contract_data?.lockbox && destination_contract_data.lockbox_adapter) {
+              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to])
+              xcallParams.to = destination_contract_data?.lockbox_adapter
+            }
+          }
+
+          const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
+          if (CANONICAL_ASSET_SYMBOL && destination_chain_data?.native_token?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
+            xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
+          }
+
+          console.log('[/]', '[xcall]', { xcallParams })
+          let request = await sdk.sdkBase.xcall(xcallParams)
+          setCallResponse({
+            status: 'pending',
+            message: `${totalSteps ? `(${currentStep}/${totalSteps}) ` : ''}Please send the bridge transaction`,
+          })
+
+          if (request) {
+            if (txs.length > 0) {
+              txs.push(request)
+              request = {
+                to: multisendContract,
+                data: encodeMultisendCall(txs),
+                value: xcallParams[relayerFeeField],
+                chainId: source_chain_data?.chain_id,
+              }
+            }
+
+            try {
+              const gasLimit = await signer.estimateGas(request)
+              if (gasLimit) {
+                request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
+              }
+            } catch (error) {}
+            const response = await signer.sendTransaction(request)
+            const { hash } = { ...response }
+
+            setCallProcessing(true)
+            setCallResponse(null)
+            const receipt = await signer.provider.waitForTransaction(hash)
+            const { transactionHash, status } = { ...receipt }
+            failed = !status
+            setXcallData(receipt)
+            setCallResponse({
+              status: failed ? 'failed' : 'success',
+              message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. (It's ok to close the browser)`,
+              tx_hash: hash,
+            })
+            success = true
+
+            if (!failed) {
+              try {
+                const destination_transacting_asset = (receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset?.contract_address ? destination_contract_data.next_asset.contract_address : destination_contract_data?.contract_address
+                const destinationDecimals = (destination_contract_data?.next_asset && equalsIgnoreCase(destination_transacting_asset, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_contract_data?.decimals) || 18
+                setLatestTransfers(
+                  _.orderBy(
+                    _.uniqBy(
+                      _.concat(
+                        {
+                          xcall_transaction_hash: transactionHash || hash,
+                          xcall_timestamp:  moment().unix(),
+                          origin_chain: source_chain_data?.chain_id,
+                          origin_domain: xcallParams.origin,
+                          origin_transacting_asset: xcallParams.asset,
+                          origin_transacting_amount: Number(parseUnits(amount, sourceDecimals)),
+                          destination_chain: destination_chain_data?.chain_id,
+                          destination_domain: xcallParams.destination,
+                          destination_transacting_asset,
+                          destination_transacting_amount: estimatedValues?.amountReceived ? parseUnits(estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? relayerFee : 0), destinationDecimals) : undefined,
+                          to: xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : xcallParams.to,
+                          force_slow: forceSlow,
+                          receive_local: receiveLocal || estimatedValues?.isNextAsset,
+                        },
+                        latestTransfers,
+                      ),
+                      'xcall_transaction_hash',
+                    ),
+                    ['xcall_timestamp'], ['desc'],
+                  )
+                )
+                setOpenTransferStatus(true)
+              } catch (error) {
+                console.log('[/]', '[xcall setLatestTransfers error]', { xcallParams }, error)
+              }
+            }
+          }
+        } catch (error) {
+          const response = parseError(error)
+          console.log('[/]', '[xcall error]', { xcallParams }, error)
+          const { code } = { ...response }
+          let { message } = { ...response }
+          if (message?.includes('insufficient funds for gas')) {
+            message = 'Insufficient gas for the destination gas fee.'
+          }
+          switch (code) {
+            case 'user_rejected':
+              reset(code)
+              break
+            default:
+              setCallResponse({ status: 'failed', ...response, message })
+              break
+          }
+          failed = !success
+        }
+      }
+    }
+
+    if (failed) {
+      setXcallData(null)
+    }
+    setCallProcessing(false)
+    setCalling(false)
+
+    if (sdk && address && success) {
+      await sleep(1 * 1000)
+      setBalanceTrigger(moment().valueOf())
+      setTransfersTrigger(moment().valueOf())
     }
   }
 
@@ -1306,28 +1314,30 @@ export default ({ useAssetChain = false }) => {
   const source_chain_data = getChainData(source_chain, chains_data)
   const destination_chain_data = getChainData(destination_chain, chains_data)
   const { name, native_token, image, color } = { ...source_chain_data }
-  const { explorer } = { ...destination_chain_data }
-  const { url, transaction_path } = { ...explorer }
+  const { url, transaction_path } = { ...destination_chain_data?.explorer }
 
   const source_asset_data = getAssetData(asset, assets_data)
   const { is_xERC20 } = { ...source_asset_data }
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
-  const _source_contract_data = _.cloneDeep(source_contract_data)
-  // xERC20 asset
-  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
-    source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+  const original_source_contract_data = _.cloneDeep(source_contract_data)
+  if (symbol) {
+    // xERC20 asset
+    if (is_xERC20 && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+      source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+    }
+    // next asset
+    else if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+      source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
+    }
+    // native asset
+    else if (source_contract_data?.wrappable && [source_asset_data.symbol, native_token?.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1) {
+      source_contract_data = { ...source_contract_data, contract_address: ZeroAddress, symbol: source_asset_data.symbol, image: source_asset_data.image }
+    }
   }
-  // next asset
-  else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
-    source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
-  }
-  // native asset
-  else if (source_contract_data?.wrappable && symbol && [source_asset_data.symbol, native_token?.symbol].findIndex(s => equalsIgnoreCase(s, symbol)) > -1) {
-    source_contract_data = { ...source_contract_data, contract_address: ZeroAddress, symbol: source_asset_data.symbol, image: source_asset_data.image }
-  }
+
   const destination_asset_data = getAssetData(asset, assets_data)
   let destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-  const _destination_contract_data = _.cloneDeep(destination_contract_data)
+  const original_destination_contract_data = _.cloneDeep(destination_contract_data)
   let isWrappableAsset = false
   // next asset
   if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
@@ -1340,54 +1350,51 @@ export default ({ useAssetChain = false }) => {
       destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
     }
   }
-  const isNextAssetOnSource = equalsIgnoreCase(source_contract_data?.contract_address, _source_contract_data?.next_asset?.contract_address)
-  const isNextAssetOnDestination = equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
 
-  const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
-  const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
-  const source_decimals = source_contract_data?.decimals || 18
-  const destination_decimals = destination_contract_data?.decimals || 18
-  const source_amount = getBalanceData(source_chain_data?.chain_id, source_contract_data?.contract_address, balances_data)?.amount
-  const destination_amount = getBalanceData(destination_chain_data?.chain_id, destination_contract_data?.contract_address, balances_data)?.amount
-  const gas_amount = getBalanceData(source_chain_data?.chain_id, ZeroAddress, balances_data)?.amount
+  const sourceSymbol = source_contract_data?.symbol || source_asset_data?.symbol
+  const destinationSymbol = destination_contract_data?.symbol || destination_asset_data?.symbol
+  const sourceDecimals = source_contract_data?.decimals || 18
+  const destinationDecimals = destination_contract_data?.decimals || 18
+  const sourceAmount = getBalanceData(source_chain_data?.chain_id, source_contract_data?.contract_address, balances_data)?.amount
 
+  // remove symbol when select xERC20
   useEffect(
     () => {
-      if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && Number(source_amount) === 0) {
+      if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && Number(sourceAmount) === 0) {
         setBridge({ ...bridge, symbol: null })
       }
     },
-    [source_contract_data, source_amount],
+    [source_contract_data, sourceAmount],
   )
 
   let { routerFee, relayerFee } = { ...fees }
   routerFee = estimatedValues?.routerFee && !(forceSlow || estimatedValues?.isFastPath === false) ? estimatedValues.routerFee : fees ? forceSlow ? 0 : routerFee : null
   relayerFee = fees ? relayerFee || 0 : null
-  const min_amount = 0
-  const max_amount = source_amount && formatUnits(BigInt(parseUnits(source_amount, source_decimals)) - BigInt(parseUnits(relayerFee && source_contract_data?.contract_address === ZeroAddress ? relayerFee : '0', source_decimals)), source_decimals)
-  const relayerFeeToDeduct = relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(relayerFee, source_decimals)) : 0
-  const feeAmountRatio = relayerFeeToDeduct > 0 && Number(amount) > 0 ? (Number(routerFee) + relayerFeeToDeduct) / amount : null
+
   const hasValue = isNumber(amount) && !isZero(amount) && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin
-
-  const estimatedReceived = estimatedValues?.amountReceived ? Number(numberToFixed(estimatedValues.amountReceived - relayerFeeToDeduct, destination_decimals)) : Number(amount) > 0 && isNumber(routerFee) ? Number(numberToFixed(amount - routerFee - relayerFeeToDeduct, destination_decimals)) : null
+  const relayerFeeToDeduct = relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(relayerFee, sourceDecimals)) : 0
+  const feeAmountRatio = relayerFeeToDeduct > 0 && Number(amount) > 0 ? (Number(routerFee) + relayerFeeToDeduct) / amount : null
+  const estimatedReceived = estimatedValues?.amountReceived ? Number(numberToFixed(estimatedValues.amountReceived - relayerFeeToDeduct, destinationDecimals)) : Number(amount) > 0 && isNumber(routerFee) ? Number(numberToFixed(amount - routerFee - relayerFeeToDeduct, destinationDecimals)) : null
   const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage) : null
+  const isNextAssetOnSource = equalsIgnoreCase(source_contract_data?.contract_address, original_source_contract_data?.next_asset?.contract_address)
+  const isNextAssetOnDestination = equalsIgnoreCase(destination_contract_data?.contract_address, original_destination_contract_data?.next_asset?.contract_address)
 
-  const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
+  const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destinationDecimals)).map(d => Number(d) > 0 ? Number(d) : 0))
   const { adopted, local } = { ...toArray(pools_data).find(d => d.chain_data?.id === destination_chain && d.asset_data?.id === asset) }
   const next_asset_data = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local?.symbol?.startsWith(WRAPPED_PREFIX) ? local : local
-  const pool_amounts = toArray(_.concat(adopted, local)).filter(d => isNumber(d.balance)).map(d => Number(d.balance))
-  const pool_amount = receiveLocal || estimatedValues?.isNextAsset ? null : Number(next_asset_data?.balance) > -1 ? Number(next_asset_data.balance) : _.min(pool_amounts)
+  const poolAmounts = toArray(_.concat(adopted, local)).filter(d => isNumber(d.balance)).map(d => Number(d.balance))
+  const poolAmount = receiveLocal || estimatedValues?.isNextAsset ? null : Number(next_asset_data?.balance) > -1 ? Number(next_asset_data.balance) : _.min(poolAmounts)
 
   let alertMessage
   if (isNumber(amount)) {
-    if (isNumber(source_amount) && BigInt(parseUnits(amount, source_decimals)) > BigInt(parseUnits(source_amount, source_decimals))) {
+    if (isNumber(sourceAmount) && BigInt(parseUnits(amount, sourceDecimals)) > BigInt(parseUnits(sourceAmount, sourceDecimals))) {
       alertMessage = 'Insufficient Balance'
     }
-    else if (Number(amount) < min_amount) {
+    else if (Number(amount) < 0) {
       alertMessage = 'The amount cannot be less than the transfer fee.'
     }
-    else if (isNumber(pool_amount) && Number(amount) > pool_amount) {
-      alertMessage = `Exceed Pool Balances: ${numberFormat(pool_amount, '0,0.00')}`
+    else if (isNumber(poolAmount) && Number(amount) > poolAmount) {
+      alertMessage = `Exceed Pool Balances: ${numberFormat(poolAmount, '0,0.00')}`
     }
     else if (fees) {
       if ((!isNumber(relayerFee) || Number(relayerFee) <= 0) && NETWORK !== 'testnet') {
@@ -1396,7 +1403,8 @@ export default ({ useAssetChain = false }) => {
       else if (Number(relayerFee) > 0) {
         switch (relayerFeeAssetType) {
           case 'native':
-            if (isNumber(gas_amount) && BigInt(parseUnits(gas_amount)) < BigInt(parseUnits(relayerFee)) + BigInt(parseUnits(source_contract_data?.contract_address === ZeroAddress ? amount : '0'))) {
+            const gasAmount = getBalanceData(source_chain_data?.chain_id, ZeroAddress, balances_data)?.amount
+            if (isNumber(gasAmount) && BigInt(parseUnits(gasAmount)) < BigInt(parseUnits(relayerFee)) + BigInt(parseUnits(source_contract_data?.contract_address === ZeroAddress ? amount : '0'))) {
               alertMessage = 'Insufficient gas for the destination gas fee.'
             }
             break
@@ -1424,9 +1432,8 @@ export default ({ useAssetChain = false }) => {
 
   const supported = checkSupported()
   const disabled = calling || approving
-  const response = callResponse || (!xcall && approveResponse) || estimateResponse
-  const wrong_chain = source_chain_data && wallet_chain_id !== source_chain_data.chain_id && !xcall
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
+  const response = callResponse || (!xcallData && approveResponse) || estimateResponse
+  const wrong_chain = source_chain_data && wallet_chain_id !== source_chain_data.chain_id && !xcallData
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
@@ -1445,7 +1452,7 @@ export default ({ useAssetChain = false }) => {
                     <button
                       onClick={
                         () => {
-                          setXcall(null)
+                          setXcallData(null)
                           setCallResponse(null)
                           setOpenTransferStatus(false)
                         }
@@ -1639,88 +1646,86 @@ export default ({ useAssetChain = false }) => {
                             showInfiniteApproval={isApproveNeeded}
                             hasNextAsset={destination_contract_data?.next_asset}
                             chainData={destination_chain_data}
-                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.filter(d => source_asset_data?.allow_paying_gas || d !== 'transacting').map(d => { return { name: d === 'transacting' ? source_symbol : native_token?.symbol, value: d } })}
+                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.filter(d => source_asset_data?.allow_paying_gas || d !== 'transacting').map(d => { return { name: d === 'transacting' ? sourceSymbol : native_token?.symbol, value: d } })}
                           />
                         )}
                       </div>
-                      {!useAssetChain && (
-                        <div className="grid grid-cols-5 gap-3 sm:gap-6">
-                          <div className="col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
-                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                                From
-                              </span>
-                            </div>
-                            <SelectChain
-                              disabled={disabled}
-                              value={source_chain}
-                              onSelect={
-                                c => {
-                                  const _source_chain = c
-                                  const _destination_chain = c === destination_chain ? source_chain : destination_chain
-                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
-                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined })
-                                  getBalances(_source_chain)
-                                  getBalances(_destination_chain)
-                                }
-                              }
-                              source={source_chain}
-                              destination={destination_chain}
-                              origin="from"
-                              fixed={source === 'pool'}
-                            />
+                      <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                        <div className="col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
+                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                            <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                              From
+                            </span>
                           </div>
-                          <div className="flex items-center justify-center mt-5.5 sm:mt-7">
-                            <button
-                              disabled={disabled}
-                              onClick={
-                                () => {
-                                  if (!disabled) {
-                                    const _source_chain = destination_chain
-                                    const _destination_chain = source_chain
-                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
-                                    setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, amount: null })
-                                    getBalances(source_chain)
-                                    getBalances(destination_chain)
-                                  }
-                                }
+                          <SelectChain
+                            disabled={disabled}
+                            value={source_chain}
+                            onSelect={
+                              c => {
+                                const _source_chain = c
+                                const _destination_chain = c === destination_chain ? source_chain : destination_chain
+                                const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
+                                setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined })
+                                getBalances(_source_chain)
+                                getBalances(_destination_chain)
                               }
-                              className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${source === 'pool' ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
-                            >
-                              <HiArrowRight size={18} className="3xl:w-6 3xl:h-6" />
-                            </button>
-                          </div>
-                          <div className="col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
-                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                                To
-                              </span>
-                            </div>
-                            <SelectChain
-                              disabled={disabled}
-                              value={destination_chain}
-                              onSelect={
-                                c => {
-                                  const _source_chain = c === source_chain ? destination_chain : source_chain
-                                  const _destination_chain = c
-                                  const _destination_chain_data = getChainData(_destination_chain, chains_data)
-                                  const source_asset_data = getAssetData(asset, assets_data)
-                                  const destination_contract_data = getContractData(_destination_chain_data?.chain_id, source_asset_data?.contracts)
-                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : source_asset_data && !destination_contract_data && NETWORK === 'mainnet' ? 'eth' : asset
-                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset })
-                                  getBalances(_source_chain)
-                                  getBalances(_destination_chain)
-                                }
-                              }
-                              source={source_chain}
-                              destination={destination_chain}
-                              origin="to"
-                              fixed={source === 'pool'}
-                              include={getChainData(undefined, chains_data, { not_disabled: true, return_all: true }).filter(d => getContractData(d.chain_id, destination_asset_data?.contracts)).map(d => d.id)}
-                            />
-                          </div>
+                            }
+                            source={source_chain}
+                            destination={destination_chain}
+                            origin="from"
+                            fixed={source === 'pool'}
+                          />
                         </div>
-                      )}
+                        <div className="flex items-center justify-center mt-5.5 sm:mt-7">
+                          <button
+                            disabled={disabled}
+                            onClick={
+                              () => {
+                                if (!disabled) {
+                                  const _source_chain = destination_chain
+                                  const _destination_chain = source_chain
+                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
+                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, amount: null })
+                                  getBalances(source_chain)
+                                  getBalances(destination_chain)
+                                }
+                              }
+                            }
+                            className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${source === 'pool' ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
+                          >
+                            <HiArrowRight size={18} className="3xl:w-6 3xl:h-6" />
+                          </button>
+                        </div>
+                        <div className="col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
+                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                            <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                              To
+                            </span>
+                          </div>
+                          <SelectChain
+                            disabled={disabled}
+                            value={destination_chain}
+                            onSelect={
+                              c => {
+                                const _source_chain = c === source_chain ? destination_chain : source_chain
+                                const _destination_chain = c
+                                const _destination_chain_data = getChainData(_destination_chain, chains_data)
+                                const source_asset_data = getAssetData(asset, assets_data)
+                                const destination_contract_data = getContractData(_destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : source_asset_data && !destination_contract_data && NETWORK === 'mainnet' ? 'eth' : asset
+                                setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset })
+                                getBalances(_source_chain)
+                                getBalances(_destination_chain)
+                              }
+                            }
+                            source={source_chain}
+                            destination={destination_chain}
+                            origin="to"
+                            fixed={source === 'pool'}
+                            include={getChainData(undefined, chains_data, { not_disabled: true, return_all: true }).filter(d => getContractData(d.chain_id, destination_asset_data?.contracts)).map(d => d.id)}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between space-x-2">
@@ -1736,12 +1741,12 @@ export default ({ useAssetChain = false }) => {
                               disabled={disabled || (source_contract_data?.contract_address === ZeroAddress ? !fees : false)}
                               onClick={
                                 () => {
-                                  if (BigInt(parseUnits(max_amount, source_decimals)) > 0) {
-                                    setBridge({ ...bridge, amount: max_amount })
-                                    if (isNumber(max_amount)) {
-                                      if (!isZero(max_amount)) {
-                                        // calculateAmountReceived(max_amount)
-                                        checkApprovedNeeded(max_amount)
+                                  const maxAmount = sourceAmount && formatUnits(BigInt(parseUnits(sourceAmount, sourceDecimals)) - BigInt(parseUnits(relayerFee && source_contract_data?.contract_address === ZeroAddress ? relayerFee : '0', sourceDecimals)), sourceDecimals)
+                                  if (BigInt(parseUnits(maxAmount, sourceDecimals)) > 0) {
+                                    setBridge({ ...bridge, amount: maxAmount })
+                                    if (isNumber(maxAmount)) {
+                                      if (!isZero(maxAmount)) {
+                                        checkApprovedNeeded(maxAmount)
                                       }
                                       else {
                                         setEstimatedValues({ amountReceived: '0', routerFee: '0', isNextAsset: receiveLocal })
@@ -1756,8 +1761,8 @@ export default ({ useAssetChain = false }) => {
                                 chainId={source_chain_data.chain_id}
                                 asset={asset}
                                 contractAddress={source_contract_data?.contract_address}
-                                decimals={source_decimals}
-                                symbol={source_symbol}
+                                decimals={sourceDecimals}
+                                symbol={sourceSymbol}
                                 trigger={balanceTrigger}
                               />
                             </button>
@@ -1766,75 +1771,29 @@ export default ({ useAssetChain = false }) => {
                       </div>
                       <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 py-2.5 px-3">
                         <div className="flex items-center justify-between space-x-2">
-                          {!useAssetChain ?
-                            <SelectAsset
-                              disabled={disabled}
-                              value={asset}
-                              onSelect={
-                                (a, s) => {
-                                  const source_asset_data = getAssetData(a, assets_data)
-                                  const destination_contract_data = getContractData(destination_chain_data?.chain_id, source_asset_data?.contracts)
-                                  const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(getChainData(undefined, chains_data, { not_disabled: true, except: source_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id : destination_chain
-                                  setBridge({ ...bridge, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
-                                  if (a !== asset) {
-                                    getBalances(source_chain)
-                                    getBalances(destination_chain)
-                                  }
+                          <SelectAsset
+                            disabled={disabled}
+                            value={asset}
+                            onSelect={
+                              (a, s) => {
+                                const source_asset_data = getAssetData(a, assets_data)
+                                const destination_contract_data = getContractData(destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(getChainData(undefined, chains_data, { not_disabled: true, except: source_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id : destination_chain
+                                setBridge({ ...bridge, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
+                                if (a !== asset) {
+                                  getBalances(source_chain)
+                                  getBalances(destination_chain)
                                 }
                               }
-                              chain={source_chain}
-                              destinationChain={destination_chain}
-                              isBridge={true}
-                              showNextAssets={showNextAssets}
-                              showNativeAssets={true}
-                              fixed={source === 'pool'}
-                              data={{ ...source_asset_data, ...source_contract_data }}
-                            /> :
-                            <SelectAssetChain
-                              disabled={disabled}
-                              chain={source_chain}
-                              asset={asset}
-                              address={source_contract_data?.contract_address}
-                              onSelect={
-                                (_chain, _asset, _address) => {
-                                  const _source_chain = _chain
-                                  const _destination_chain = _chain === destination_chain ? source_chain : destination_chain
-                                  const source_chain_data = getChainData(_source_chain, chains_data)
-                                  const source_asset_data = getAssetData(_asset, assets_data)
-                                  const source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
-                                  const { next_asset } = { ...source_contract_data }
-
-                                  let _symbol
-                                  if (_address) {
-                                    if (equalsIgnoreCase(_address, source_contract_data?.contract_address)) {
-                                      _symbol = undefined
-                                    }
-                                    else if (equalsIgnoreCase(_address, next_asset?.contract_address)) {
-                                      _symbol = next_asset.symbol
-                                    }
-                                    else if (equalsIgnoreCase(_address, ZeroAddress)) {
-                                      _symbol = source_asset_data?.symbol
-                                    }
-                                  }
-
-                                  setBridge({
-                                    ...bridge,
-                                    source_chain: _source_chain,
-                                    destination_chain: _destination_chain,
-                                    asset: _asset,
-                                    symbol: _symbol,
-                                    amount: _chain !== source_chain && _asset !== asset && _symbol !== symbol ? null : amount,
-                                  })
-                                  if (_chain !== source_chain && _asset !== asset && _symbol !== symbol) {
-                                    getBalances(_source_chain)
-                                  }
-                                }
-                              }
-                              isBridge={true}
-                              showNextAssets={showNextAssets}
-                              fixed={source === 'pool'}
-                            />
-                          }
+                            }
+                            chain={source_chain}
+                            destinationChain={destination_chain}
+                            isBridge={true}
+                            showNextAssets={showNextAssets}
+                            showNativeAssets={true}
+                            fixed={source === 'pool'}
+                            data={{ ...source_asset_data, ...source_contract_data }}
+                          /> :
                           <div>
                             <DebounceInput
                               debounceTimeout={750}
@@ -1854,12 +1813,11 @@ export default ({ useAssetChain = false }) => {
                                     if (value.startsWith('.')) {
                                       value = `0${value}`
                                     }
-                                    value = numberToFixed(value, source_decimals)
+                                    value = numberToFixed(value, sourceDecimals)
                                   }
                                   setBridge({ ...bridge, amount: value })
                                   if (isNumber(value)) {
                                     if (!isZero(value)) {
-                                      // calculateAmountReceived(value)
                                       checkApprovedNeeded(value)
                                     }
                                     else {
@@ -1902,8 +1860,8 @@ export default ({ useAssetChain = false }) => {
                                   chainId={destination_chain_data.chain_id}
                                   asset={asset}
                                   contractAddress={destination_contract_data?.contract_address}
-                                  decimals={destination_decimals}
-                                  symbol={destination_symbol}
+                                  decimals={destinationDecimals}
+                                  symbol={destinationSymbol}
                                   trigger={balanceTrigger}
                                 />
                               </div>
@@ -1911,90 +1869,31 @@ export default ({ useAssetChain = false }) => {
                           </div>
                           <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 py-4 px-3">
                             <div className="flex items-center justify-between space-x-2">
-                              {!useAssetChain ?
-                                <SelectAsset
-                                  disabled={disabled}
-                                  value={asset}
-                                  onSelect={
-                                    (a, s) => {
-                                      if (!(source === 'pool' || !isWrappableAsset)) {
-                                        setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
-                                        if (a !== asset) {
-                                          getBalances(source_chain)
-                                          getBalances(destination_chain)
-                                        }
+                              <SelectAsset
+                                disabled={disabled}
+                                value={asset}
+                                onSelect={
+                                  (a, s) => {
+                                    if (!(source === 'pool' || !isWrappableAsset)) {
+                                      setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
+                                      if (a !== asset) {
+                                        getBalances(source_chain)
+                                        getBalances(destination_chain)
                                       }
                                     }
                                   }
-                                  chain={destination_chain}
-                                  isBridge={true}
-                                  showNextAssets={!isWrappableAsset}
-                                  showNativeAssets={true}
-                                  showOnlyWrappable={isWrappableAsset}
-                                  fixed={source === 'pool' || !isWrappableAsset}
-                                  data={{ ...destination_asset_data, ...destination_contract_data }}
-                                /> :
-                                <SelectAssetChain
-                                  disabled={disabled}
-                                  chain={destination_chain}
-                                  asset={asset}
-                                  address={destination_contract_data?.contract_address}
-                                  onSelect={
-                                    (_chain, _asset, _address) => {
-                                      if (source !== 'pool') {
-                                        const _source_chain = _chain === source_chain ? destination_chain : source_chain
-                                        const _destination_chain = _chain
-                                        const destination_chain_data = getChainData(_destination_chain, chains_data)
-                                        const destination_asset_data = getAssetData(_asset, assets_data)
-                                        const destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-                                        const { next_asset, wrappable } = { ...destination_contract_data }
-
-                                        let receiveLocal = false
-                                        let receive_wrap = false
-                                        if (_address && equalsIgnoreCase(_address, next_asset?.contract_address)) {
-                                          receiveLocal = true
-                                        }
-                                        else if (wrappable && !equalsIgnoreCase(_address, ZeroAddress)) {
-                                          receive_wrap = true
-                                        }
-
-                                        if (equalsIgnoreCase(query?.receive_next?.toString(), 'true') && !receiveLocal) {
-                                          const params = { amount, receive_next: receiveLocal }
-                                          if (!isNumber(amount)) {
-                                            delete params.amount
-                                          }
-                                          router.push(`/${_source_chain && _destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${_source_chain}-to-${_destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
-                                        }
-                                        else {
-                                          setBridge({
-                                            ...bridge,
-                                            source_chain: _source_chain,
-                                            destination_chain: _destination_chain,
-                                            amount: _chain !== _destination_chain ? null : amount,
-                                            receive_wrap,
-                                          })
-                                          setOptions({ ...options, receiveLocal })
-                                        }
-                                        if (_chain !== _destination_chain) {
-                                          getBalances(_destination_chain)
-                                        }
-                                      }
-                                    }
-                                  }
-                                  isBridge={true}
-                                  showNextAssets={showNextAssets}
-                                  isDestination={true}
-                                  sourceChain={source_chain}
-                                  fixed={source === 'pool'}
-                                />
-                              }
+                                }
+                                chain={destination_chain}
+                                isBridge={true}
+                                showNextAssets={!isWrappableAsset}
+                                showNativeAssets={true}
+                                showOnlyWrappable={isWrappableAsset}
+                                fixed={source === 'pool' || !isWrappableAsset}
+                                data={{ ...destination_asset_data, ...destination_contract_data }}
+                              />
                               {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
                                 <span className="whitespace-nowrap text-lg 3xl:text-2xl font-semibold">
                                   {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
-                                    // <NumberDisplay
-                                    //   value={estimatedReceived > 0 ? estimatedReceived : 0}
-                                    //   className={`w-36 sm:w-48 bg-transparent ${isNumber(estimatedReceived) && !isZero(estimatedReceived) ? '' : 'text-slate-500 dark:text-slate-500'} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
-                                    // /> :
                                     <span className={`w-36 sm:w-48 bg-transparent ${isNumber(estimatedReceived) && !isZero(estimatedReceived) ? '' : 'text-slate-500 dark:text-slate-500'} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}>
                                       {estimatedReceived > 0 ? estimatedReceived : 0}
                                     </span> :
@@ -2013,36 +1912,9 @@ export default ({ useAssetChain = false }) => {
                               className="cursor-pointer flex items-center justify-between space-x-1"
                             >
                               <div className={`whitespace-nowrap ${collapse ? 'text-slate-500 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                {true || is_xERC20 ? 'Additional Details' : 'Estimated Fees'}
+                                Additional Details
                               </div>
-                              <div className="flex items-center space-x-2">
-                                {false && !is_xERC20 && (
-                                  <div>
-                                    {fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
-                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                        {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
-                                          <NumberDisplay
-                                            value={numberToFixed((Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0), relayerFeeAssetType === 'native' ? native_token?.decimals || 18 : source_decimals)}
-                                            suffix={` ${source_symbol}`}
-                                            className={`${relayerFeeAssetType === 'native' ? 'text-xs' : 'text-sm'} 3xl:text-xl`}
-                                          /> :
-                                          <span>- {source_symbol}</span>
-                                        }
-                                        {relayerFeeAssetType === 'native' && (
-                                          <>
-                                            <span>+</span>
-                                            <NumberDisplay
-                                              value={Number(relayerFee) > 0 ? relayerFee : 0}
-                                              suffix={native_token?.symbol && ` ${native_token.symbol}`}
-                                              className="text-xs 3xl:text-xl"
-                                            />
-                                          </>
-                                        )}
-                                      </span> :
-                                      <Spinner width={14} height={14} />
-                                    }
-                                  </div>
-                                )}
+                              <div className="flex items-center">
                                 <div>{collapse ? <BiChevronDown size={20} className="3xl:w-5 3xl:h-5" /> : <BiChevronUp size={20} className="3xl:w-5 3xl:h-5" />}</div>
                               </div>
                             </div>
@@ -2128,7 +2000,7 @@ export default ({ useAssetChain = false }) => {
                                           <NumberDisplay value={Number(routerFee) > 0 ? routerFee : 0} className="text-sm 3xl:text-xl" /> :
                                           <span>-</span>
                                         }
-                                        <span>{source_symbol}</span>
+                                        <span>{sourceSymbol}</span>
                                       </span> :
                                       <Spinner width={14} height={14} />
                                     }
@@ -2147,7 +2019,7 @@ export default ({ useAssetChain = false }) => {
                                     <div className="flex items-center space-x-1.5">
                                       <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                         <NumberDisplay value={Number(relayerFee) > 0 ? relayerFee : 0} className="text-sm 3xl:text-xl" />
-                                        <span>{relayerFeeAssetType === 'transacting' ? source_symbol : native_token?.symbol}</span>
+                                        <span>{relayerFeeAssetType === 'transacting' ? sourceSymbol : native_token?.symbol}</span>
                                       </span>
                                       <button
                                         disabled={disabled}
@@ -2166,7 +2038,7 @@ export default ({ useAssetChain = false }) => {
                                     <Spinner width={14} height={14} />
                                   }
                                 </div>
-                                {ethereum_provider && isApproveNeeded && (
+                                {signer && isApproveNeeded && (
                                   <div className="flex flex-col space-y-0.5">
                                     <div className="flex items-center justify-between space-x-1">
                                       <Tooltip content="We need your approval to execute this transaction on your behalf.">
@@ -2197,7 +2069,7 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2 && source_chain_data?.id === 'ethereum') && !(isNextAssetOnSource && !_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
+                                {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2 && source_chain_data?.id === 'ethereum') && !(isNextAssetOnSource && !original_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
                                   <>
                                     {source !== 'pool' && (
                                       <div className="flex flex-col space-y-0.5">
@@ -2306,12 +2178,12 @@ export default ({ useAssetChain = false }) => {
                                         <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                           {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
                                             <NumberDisplay
-                                              value={numberToFixed((estimatedReceived > 0 ? estimatedReceived : 0) * ((100 - (isNumber(slippage) && slippage >= 0 ? slippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)) / 100), estimatedReceived > 0 ? destination_decimals : 0)}
+                                              value={numberToFixed((estimatedReceived > 0 ? estimatedReceived : 0) * ((100 - (isNumber(slippage) && slippage >= 0 ? slippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)) / 100), estimatedReceived > 0 ? destinationDecimals : 0)}
                                               className="text-sm 3xl:text-xl"
                                             /> :
                                             <span>-</span>
                                           }
-                                          <span>{destination_symbol}</span>
+                                          <span>{destinationSymbol}</span>
                                         </span> :
                                         <Spinner width={14} height={14} />
                                       }
@@ -2325,10 +2197,10 @@ export default ({ useAssetChain = false }) => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
@@ -2352,13 +2224,13 @@ export default ({ useAssetChain = false }) => {
                         </div>
                       )
                     }
-                    {provider && supported && (wrong_chain || isNumber(amount)) && (xcall || isNumber(source_amount)) ?
+                    {provider && supported && (wrong_chain || isNumber(amount)) && (xcallData || isNumber(sourceAmount)) ?
                       wrong_chain ?
                         <Wallet
                           connectChainId={source_chain_data?.chain_id}
                           className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                         >
-                          <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                          <span>Switch to</span>
                           {image && (
                             <Image
                               src={image}
@@ -2371,18 +2243,18 @@ export default ({ useAssetChain = false }) => {
                             {name}
                           </span>
                         </Wallet> :
-                        !xcall && !calling && !callResponse && alertMessage ?
+                        !xcallData && !calling && !callResponse && alertMessage ?
                           <Alert status="failed" closeDisabled={true}>
                             <span>{alertMessage}</span>
                           </Alert> :
-                          !xcall && !callResponse && !approveResponse && !estimateResponse ?
+                          !xcallData && !callResponse && !approveResponse && !estimateResponse ?
                             <button
                               disabled={disabled || isZero(amount) || estimatedReceived <= 0 || ((!isNumber(relayerFee) || Number(relayerFee) <= 0) && NETWORK !== 'testnet')}
                               onClick={
                                 () => {
                                   setRecipientEditing(false)
                                   setSlippageEditing(false)
-                                  call(relayerFee)
+                                  xcall(relayerFee)
                                 }
                               }
                               className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500 text-white' : isZero(amount) || estimatedReceived <= 0 || ((!isNumber(relayerFee) || Number(relayerFee) <= 0) && NETWORK !== 'testnet') ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`}
@@ -2480,8 +2352,8 @@ export default ({ useAssetChain = false }) => {
               </div>
             }
           </div>
-          {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && pendingTransfers.findIndex(d => [d.origin_bridged_asset, d.origin_transacting_asset].findIndex(a => equalsIgnoreCase(a, _source_contract_data.xERC20)) > -1) < 0 && (
+          {!openTransferStatus && original_source_contract_data?.mintable && <Faucet tokenId={asset} contractData={original_source_contract_data} />}
+          {!openTransferStatus && original_source_contract_data?.xERC20 && !calling && !callResponse && pendingTransfers.findIndex(d => [d.origin_bridged_asset, d.origin_transacting_asset].findIndex(a => equalsIgnoreCase(a, original_source_contract_data.xERC20)) > -1) < 0 && (
             <div className="max-w-md 3xl:max-w-xl">
               <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
             </div>

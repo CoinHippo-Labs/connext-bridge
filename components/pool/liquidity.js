@@ -43,7 +43,7 @@ export default ({ pool, userPools, onFinish }) => {
   const { pools_data } = { ...pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { provider, signer, address } = { ...wallet_data }
   const wallet_chain_id = wallet_data?.chain_id
   const { balances_data } = { ...balances }
 
@@ -244,22 +244,10 @@ export default ({ pool, userPools, onFinish }) => {
               break
             }
 
-            let _amountX
-            let _amountY
+            const _amountX = amountX
+            const _amountY = amountY
             const x_decimals = x_asset_data?.decimals || 18
             const y_decimals = y_asset_data?.decimals || 18
-            if (isNumber(amountX) && x_decimals === 18 && typeof amountX === 'string' && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
-              _amountX = amountX//.substring(0, amountX.length - 1)
-            }
-            else {
-              _amountX = amountX
-            }
-            if (isNumber(amountY) && y_decimals === 18 && typeof amountY === 'string' && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
-              _amountY = amountY//.substring(0, amountY.length - 1)
-            }
-            else {
-              _amountY = amountY
-            }
 
             let amounts = [parseUnits(_amountX, x_decimals), parseUnits(_amountY, y_decimals)]
             const minToMint = '0'
@@ -478,7 +466,7 @@ export default ({ pool, userPools, onFinish }) => {
                   } catch (error) {}
                   const response = await signer.sendTransaction(request)
                   const { hash } = { ...response }
- 
+
                   setCallProcessing(true)
                   success = hash
                   const receipt = await signer.provider.waitForTransaction(hash)
@@ -804,7 +792,6 @@ export default ({ pool, userPools, onFinish }) => {
   const disabled = !pool_data || error || approving || calling
   const response = callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     <div className="order-1 lg:order-2 space-y-3">
@@ -1080,7 +1067,7 @@ export default ({ pool, userPools, onFinish }) => {
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
-                      <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                      <span>Switch to</span>
                       {image && (
                         <Image
                           src={image}
@@ -1553,7 +1540,7 @@ export default ({ pool, userPools, onFinish }) => {
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
-                      <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                      <span>Switch to</span>
                       {image && (
                         <Image
                           src={image}
