@@ -5,7 +5,7 @@ import { XTransferStatus, XTransferErrorStatus, encodeMultisendCall } from '@con
 import { PERMIT2_ADDRESS, AllowanceTransfer, MaxSigDeadline, MaxAllowanceExpiration } from '@uniswap/permit2-sdk'
 import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
-import { BigNumber, Contract, utils } from 'ethers'
+import { BigNumber, Contract, constants, utils } from 'ethers'
 const { AddressZero: ZeroAddress, MaxUint256 } = { ...constants }
 const { getAddress } = { ...utils }
 import _ from 'lodash'
@@ -1793,7 +1793,7 @@ export default () => {
                             showNativeAssets={true}
                             fixed={source === 'pool'}
                             data={{ ...source_asset_data, ...source_contract_data }}
-                          /> :
+                          />
                           <div>
                             <DebounceInput
                               debounceTimeout={750}
