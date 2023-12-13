@@ -911,7 +911,7 @@
     "id": "space",
     "symbol": "SPACE",
     "name": "Space Token",
-    "image": "/logos/assets/space.png",
+    "image": "/logos/assets/spacetoken.png",
     "is_xERC20": true,
     "contracts": [
       {
