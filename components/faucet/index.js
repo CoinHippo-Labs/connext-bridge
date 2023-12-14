@@ -67,7 +67,7 @@ export default (
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
-  const { chain_id, ethereum_provider, signer, address } = { ...wallet_data }
+  const { chain_id, signer, address } = { ...wallet_data }
   const { balances_data } = { ...balances }
 
   const [data, setData] = useState(null)
@@ -225,7 +225,6 @@ export default (
   const callResponse = mintResponse || withdrawResponse
   const { status, message, hash } = { ...callResponse }
   const disabled = minting || withdrawing
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return asset_data && (
     <div className={className || 'w-full max-w-md 3xl:max-w-xl bg-white dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6 3xl:p-8'}>
@@ -341,7 +340,7 @@ export default (
                   connectChainId={chain_data?.chain_id}
                   className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
                 >
-                  <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                  <span>Switch to</span>
                   {image && (
                     <Image
                       src={image}

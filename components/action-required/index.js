@@ -383,7 +383,7 @@ export default (
                 if (!equalsIgnoreCase(delegate, address)) {
                   message = 'Must update slippage with delegate'
                   setUpdateResponse({ status: 'failed', ...response, message })
-                  break 
+                  break
                 }
               default:
                 setUpdateResponse({ status: 'failed', ...response })
@@ -490,7 +490,6 @@ export default (
 
   const disabled = forceDisabled || updating
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return data && buttonTitle && (
     <Modal
@@ -683,7 +682,7 @@ export default (
                 connectChainId={chain_data?.chain_id}
                 className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
               >
-                <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                <span>Switch to</span>
                 {chain_data?.image && (
                   <Image
                     src={chain_data.image}
