@@ -68,4 +68,7 @@ export const WEB3MODAL = createWeb3Modal({
     '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
     '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
   ],
+  excludeWalletIds: [
+    '19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927',
+  ],
 })
