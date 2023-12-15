@@ -774,7 +774,7 @@
         "symbol": "FRACTION",
         "xERC20": "0x4602e7CFE18d8b16ED13538603B00073F5c28bc8",
         "lockbox": "0x535948cad8f8696166abc16fac676677be118996",
-        "lockbox_adapter": "0x9bA95982A52574CeBaBD3fcad6AA355a3034A58F"
+        "lockbox_adapter": "0x3Cb55bFBB1f4973FCb9705Bab4aBb7E72BF85eAF"
       },
       {
         "contract_address": "0xbD80CFA9d93A87D1bb895f810ea348E496611cD4",
@@ -922,9 +922,13 @@
         "decimals": 18
       },
       {
-        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "contract_address": "0xB53Ec4aCe420a62Cfb75aFdEba600D284777cd65",
         "chain_id": 137,
-        "decimals": 18
+        "decimals": 18,
+        "symbol": "SPACE",
+        "xERC20": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "lockbox": "0x3267263E005f82A70867B567d4fF06D7e9c52eCf",
+        "lockbox_adapter": "0x6777c6713F13e499232B3a0CdA246e357a9Cf5EB"
       },
       {
         "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
