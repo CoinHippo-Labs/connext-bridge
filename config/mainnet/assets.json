@@ -13,7 +13,7 @@
         "symbol": "NEXT",
         "xERC20": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "lockbox": "0x22f424Bca11FE154c403c277b5F8dAb54a4bA29b",
-        "lockbox_adapter": "0x28496853Bc91144eefd5771144C4f6C6Af813167"
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
       },
       {
         "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
@@ -453,7 +453,7 @@
         "symbol": "RADAR",
         "xERC20": "0x202426c15a18a0e0fE3294415E66421891E2EB7C",
         "lockbox": "0xFf6792A39F44FB67B4796906a5Cb77C677328858",
-        "lockbox_adapter": "0x6ea3dc2e17a0466b36dd3258574e0bd2e4685452"
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
       },
       {
         "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
@@ -813,7 +813,7 @@
         "symbol": "GRUMPYCAT",
         "xERC20": "0x3B350F202473932411772C8Cb76DB7975f42397E",
         "lockbox": "0x713F8CE92B4369f2206AFEE90bD13464Bbfb28bE",
-        "lockbox_adapter": "0x6e7Ab4b68f1B184F677ED5e8e6e8f9348c3957a4"
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
       },
       {
         "contract_address": "0x3B350F202473932411772C8Cb76DB7975f42397E",
@@ -852,7 +852,7 @@
         "symbol": "IXT",
         "xERC20": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
         "lockbox": "0x6aA6AB7d61EF293AC445e173bf8A32Cb446d18F0",
-        "lockbox_adapter": "0x3bee41753779E18A2D459a84C612aC6Ef903c5c2"
+        "lockbox_adapter": "0x6777c6713F13e499232B3a0CdA246e357a9Cf5EB"
       },
       {
         "contract_address": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
@@ -886,7 +886,7 @@
         "symbol": "URUS",
         "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
         "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
-        "lockbox_adapter": "0x0c18d44cfd5e98ff4fecfe8398cb102979b3a6c8"
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
       },
       {
         "contract_address": "0xc6DdDB5bc6E61e0841C54f3e723Ae1f3A807260b",
@@ -895,7 +895,7 @@
         "symbol": "URUS",
         "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
         "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
-        "lockbox_adapter": "0xC65F7B26a7bBa778efD39641C46599bBDBEcCCf7"
+        "lockbox_adapter": "0xB71D06f2e73918386B75c24dD26c95DD938f7912"
       }
     ],
     "color": "#1F3660"
@@ -914,7 +914,7 @@
         "symbol": "SPACE",
         "xERC20": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
         "lockbox": "0xb3A7b5c4e5Dbc69d5898F4189989AC609D04a03C",
-        "lockbox_adapter": "0xa3A8901Ea3db2Ab4712AdCfa5BD91035324e73CE"
+        "lockbox_adapter": "0xB71D06f2e73918386B75c24dD26c95DD938f7912"
       },
       {
         "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
