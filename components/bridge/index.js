@@ -2072,97 +2072,94 @@ export default () => {
                                 {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2 && source_chain_data?.id === 'ethereum') && !(isNextAssetOnSource && !original_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
                                   <>
                                     {source !== 'pool' && (
-                                      <div className="flex flex-col space-y-0.5">
-                                        <div className="flex items-start justify-between space-x-1">
-                                          <Tooltip content="The maximum percentage you are willing to lose due to market changes.">
-                                            <div className="flex items-center">
-                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                Slippage tolerance
-                                              </div>
-                                              <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
+                                      <div className="flex items-start justify-between space-x-1">
+                                        <Tooltip content="The maximum percentage you are willing to lose due to market changes.">
+                                          <div className="flex items-center">
+                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                              Slippage tolerance
                                             </div>
-                                          </Tooltip>
-                                          <div className="flex flex-col sm:items-end space-y-1.5">
-                                            {slippageEditing ?
-                                              <>
-                                                <div className="flex items-center justify-end space-x-1.5">
-                                                  <DebounceInput
-                                                    debounceTimeout={750}
-                                                    size="small"
-                                                    type="number"
-                                                    placeholder="0.00"
-                                                    value={isNumber(slippage) ? slippage : ''}
-                                                    onChange={
-                                                      e => {
-                                                        const regex = /^[0-9.\b]+$/
-                                                        let value
-                                                        if (e.target.value === '' || regex.test(e.target.value)) {
-                                                          value = e.target.value
-                                                        }
-                                                        if (typeof value === 'string') {
-                                                          if (value.startsWith('.')) {
-                                                            value = `0${value}`
-                                                          }
-                                                          if (isNumber(value)) {
-                                                            value = Number(value)
-                                                          }
-                                                        }
-                                                        value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_PERCENT_BRIDGE_SLIPPAGE : value
-                                                        setOptions({ ...options, slippage: isNumber(value) ? parseFloat(numberToFixed(value, 2)) : value })
+                                            <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
+                                          </div>
+                                        </Tooltip>
+                                        <div className="flex flex-col sm:items-end space-y-1.5">
+                                          {slippageEditing ?
+                                            <>
+                                              <div className="flex items-center justify-end space-x-1.5">
+                                                <DebounceInput
+                                                  debounceTimeout={750}
+                                                  size="small"
+                                                  type="number"
+                                                  placeholder="0.00"
+                                                  value={isNumber(slippage) ? slippage : ''}
+                                                  onChange={
+                                                    e => {
+                                                      const regex = /^[0-9.\b]+$/
+                                                      let value
+                                                      if (e.target.value === '' || regex.test(e.target.value)) {
+                                                        value = e.target.value
                                                       }
-                                                    }
-                                                    onWheel={e => e.target.blur()}
-                                                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                                    className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
-                                                  />
-                                                  <button
-                                                    onClick={() => setSlippageEditing(false)}
-                                                    className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                  >
-                                                    <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
-                                                  </button>
-                                                </div>
-                                                <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                  {[3.0, 1.0, 0.5].map((s, i) => (
-                                                    <div
-                                                      key={i}
-                                                      onClick={
-                                                        () => {
-                                                          setOptions({ ...options, slippage: s })
-                                                          setSlippageEditing(false)
+                                                      if (typeof value === 'string') {
+                                                        if (value.startsWith('.')) {
+                                                          value = `0${value}`
+                                                        }
+                                                        if (isNumber(value)) {
+                                                          value = Number(value)
                                                         }
                                                       }
-                                                      className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
-                                                    >
-                                                      {s} %
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </> :
-                                              <div className="flex items-center space-x-1.5">
-                                                <NumberDisplay
-                                                  value={slippage}
-                                                  suffix="%"
-                                                  className="whitespace-nowrap text-sm 3xl:text-xl font-semibold"
-                                                />
-                                                <button
-                                                  disabled={disabled}
-                                                  onClick={
-                                                    () => {
-                                                      if (!disabled) {
-                                                        setSlippageEditing(true)
-                                                      }
+                                                      value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_PERCENT_BRIDGE_SLIPPAGE : value
+                                                      setOptions({ ...options, slippage: isNumber(value) ? parseFloat(numberToFixed(value, 2)) : value })
                                                     }
                                                   }
-                                                  className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                  onWheel={e => e.target.blur()}
+                                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                                  className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
+                                                />
+                                                <button
+                                                  onClick={() => setSlippageEditing(false)}
+                                                  className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
                                                 >
-                                                  <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
+                                                  <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
                                                 </button>
                                               </div>
-                                            }
-                                          </div>
+                                              <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                {[3.0, 1.0, 0.5].map((s, i) => (
+                                                  <div
+                                                    key={i}
+                                                    onClick={
+                                                      () => {
+                                                        setOptions({ ...options, slippage: s })
+                                                        setSlippageEditing(false)
+                                                      }
+                                                    }
+                                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
+                                                  >
+                                                    {s} %
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </> :
+                                            <div className="flex items-center space-x-1.5">
+                                              <NumberDisplay
+                                                value={slippage}
+                                                suffix="%"
+                                                className="whitespace-nowrap text-sm 3xl:text-xl font-semibold"
+                                              />
+                                              <button
+                                                disabled={disabled}
+                                                onClick={
+                                                  () => {
+                                                    if (!disabled) {
+                                                      setSlippageEditing(true)
+                                                    }
+                                                  }
+                                                }
+                                                className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                              >
+                                                <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
+                                              </button>
+                                            </div>
+                                          }
                                         </div>
-                                        <WarningSlippage value={slippage} estimatedValue={estimatedSlippage} />
                                       </div>
                                     )}
                                     <div className="flex items-center justify-between space-x-1">
@@ -2215,6 +2212,7 @@ export default () => {
                               </div>
                             )}
                           </div>
+                          {source !== 'pool' && <WarningSlippage value={slippage} estimatedValue={estimatedSlippage} />}
                           {!calling && <WarningFeeRatio ratio={feeAmountRatio} />}
                         </div>
                       </div> :
