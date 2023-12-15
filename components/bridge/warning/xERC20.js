@@ -211,7 +211,7 @@ export default ({ asset, contract }) => {
       ) :
       Number(amount) > AMOUNT_THRESHOLD && (
         <div className="flex items-start space-x-1.5 3xl:space-x-2.5">
-          <IoWarning size={16} className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400" />
+          <IoWarning size={16} className="min-w-max max-w-min 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400" />
           <div className="space-y-2">
             <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
               {`You have a pending balance as x${symbol} in your wallet as a previous transfer did not complete. Please complete the transfer or switch back to ${symbol} here.`}
