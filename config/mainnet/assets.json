@@ -315,8 +315,7 @@
           "image": "/logos/assets/nextdai.png"
         },
         "wrappable": true,
-        "is_pool": true,
-        "disabled": true
+        "is_pool": true
       },
       {
         "contract_address": "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
