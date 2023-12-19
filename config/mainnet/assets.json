@@ -315,7 +315,8 @@
           "image": "/logos/assets/nextdai.png"
         },
         "wrappable": true,
-        "is_pool": true
+        "is_pool": true,
+        "disabled": true
       },
       {
         "contract_address": "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
@@ -328,7 +329,7 @@
           "symbol": "nextDAI",
           "image": "/logos/assets/nextdai.png"
         },
-        "is_pool": true
+        "is_pool": false
       }
     ],
     "color": "#f4b333",
@@ -433,6 +434,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
+        "wrappable": true,
         "is_pool": true
       }
     ],
@@ -458,6 +460,12 @@
       {
         "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
         "chain_id": 56,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0xdCb72AE4d5dc6Ae274461d57E65dB8D50d0a33AD",
+        "chain_id": 137,
         "decimals": 18,
         "symbol": "RADAR"
       }
@@ -904,7 +912,7 @@
     "id": "space",
     "symbol": "SPACE",
     "name": "Space Token",
-    "image": "/logos/assets/space.png",
+    "image": "/logos/assets/spacetoken.png",
     "is_xERC20": true,
     "contracts": [
       {

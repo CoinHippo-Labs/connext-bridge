@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect, useSignMessage } from 'wagmi'
-// import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { providers } from 'ethers'
 import { hashMessage, parseAbiItem, verifyMessage } from 'viem'
 
@@ -17,12 +16,6 @@ const publicClientToProvider = publicClient => {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   }
-  // if (transport.type === 'fallback') {
-  //   const providers = transport.transports.map(({ value }) => new JsonRpcProvider(value?.url, network))
-  //   if (providers.length === 1) return providers[0]
-  //   return new FallbackProvider(providers)
-  // }
-  // return new JsonRpcProvider(transport.url, network)
   if (transport.type === 'fallback') {
     return new providers.FallbackProvider(transport.transports.map(({ value }) => new providers.JsonRpcProvider(value?.url, network)))
   }
@@ -36,8 +29,6 @@ const walletClientToSigner = walletClient => {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   }
-  // const provider = new BrowserProvider(transport, network)
-  // const signer = new JsonRpcSigner(provider, account.address)
   const provider = new providers.Web3Provider(transport, network)
   const signer = provider.getSigner(account.address)
   return signer

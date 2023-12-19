@@ -98,12 +98,6 @@ export default (
         </div>
       )}
       <div className={`flex items-center space-x-1.5 sm:space-x-2 ${!image ? 'sm:ml-3' : ''}`}>
-        {/*<span className="whitespace-nowrap sm:text-lg 3xl:text-2xl font-semibold">
-          {name}
-        </span>
-        <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 sm:text-lg 3xl:text-2xl font-medium">
-          {symbol}
-        </span>*/}
         <span className="whitespace-nowrap sm:text-lg 3xl:text-2xl font-semibold">
           {symbol}
         </span>

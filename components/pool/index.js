@@ -37,12 +37,13 @@ export default () => {
   const [userPools, setUserPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
-  // get pool from path
+  // get [pool] from path
   useEffect(
     () => {
       if (pool_assets_data) {
         let updated = false
         const path = getPath(asPath)
+
         if (path.includes('on-')) {
           const paths = split(path.replace('/pool/', ''), 'normal', '-')
           const chain = paths[paths.indexOf('on') + 1]
@@ -71,7 +72,7 @@ export default () => {
     [chains_data, pool_assets_data, asPath],
   )
 
-  // set pool to path
+  // set [pool] to path
   useEffect(
     () => {
       const params = { ...getQueryParams(asPath) }
@@ -79,6 +80,7 @@ export default () => {
         const { chain, asset } = { ...pool }
         const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
         const { chain_id } = { ...chain_data }
+
         if (chain_data) {
           params.chain = chain
           if (asset && getAssetData(asset, pool_assets_data, { chain_id })) {

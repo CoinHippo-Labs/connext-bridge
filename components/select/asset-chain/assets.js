@@ -180,31 +180,6 @@ export default (
 
   return (
     <div>
-      {/*<div className="flex flex-wrap items-center mt-1 mb-2">
-        {_.uniqBy(_assets_data, 'id').map((d, i) => {
-          const { id, symbol, image } = { ...d }
-          const selected = id === filterAsset
-          return (
-            <div
-              key={i}
-              onClick={() => setFilterAsset(selected ? null : id)}
-              className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mb-1.5 mr-1.5 py-1 px-1.5"
-            >
-              {image && (
-                <Image
-                  src={image}
-                  width={20}
-                  height={20}
-                  className="rounded-full"
-                />
-              )}
-              <span className={`whitespace-nowrap ${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
-                {symbol}
-              </span>
-            </div>
-          )
-        })}
-      </div>*/}
       <div className="flex flex-wrap items-center mt-1 mb-2">
         {toArray(chains_data).filter(d => !isBridge || !d.disabled_bridge).map((d, i) => {
           const { id, name, image } = { ...d }

@@ -42,7 +42,7 @@ export default () => {
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { provider, signer, address } = { ...wallet_data }
   const wallet_chain_id = wallet_data?.chain_id
   const { balances_data } = { ...balances }
 
@@ -70,13 +70,14 @@ export default () => {
   const [pairTrigger, setPairTrigger] = useState(null)
   const [balanceTrigger, setBalanceTrigger] = useState(null)
 
-  // get swap from path
+  // get [swap] from path
   useEffect(
     () => {
       if (pool_assets_data) {
         let updated = false
         const path = getPath(asPath)
         const params = getQueryParams(asPath)
+
         if (path.includes('on-')) {
           const { amount, from } = { ...params }
           const paths = split(path.replace('/swap/', ''), 'normal', '-')
@@ -113,7 +114,7 @@ export default () => {
     [chains_data, pool_assets_data, asPath],
   )
 
-  // set swap to path
+  // set [swap] to path
   useEffect(
     () => {
       const params = { ...getQueryParams(asPath) }
@@ -121,6 +122,7 @@ export default () => {
         const { chain, asset, amount, origin } = { ...swap }
         const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
         const { chain_id } = { ...chain_data }
+
         if (chain_data) {
           params.chain = chain
           if (asset && getAssetData(asset, pool_assets_data, { chain_id })) {
@@ -653,7 +655,6 @@ export default () => {
   const disabled = swapAmount === true || approving || calling
   const response = callResponse || approveResponse || calculateSwapResponse
   const wrong_chain = chain_data && wallet_chain_id !== chain_id && !callResponse
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
@@ -962,7 +963,7 @@ export default () => {
               connectChainId={chain_id}
               className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
             >
-              <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+              <span>Switch to</span>
               {image && (
                 <Image
                   src={image}
