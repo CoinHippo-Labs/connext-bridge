@@ -973,13 +973,10 @@
         "lockbox_adapter": "0x45BF3c737e57B059a5855280CA1ADb8e9606AC68"
       },
       {
-        "contract_address": "0x0ffB33812FA5cd8bCE181Db3FD76E11935105B12",
+        "contract_address": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
         "chain_id": 42161,
         "decimals": 18,
-        "symbol": "oLIT",
-        "xERC20": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
-        "lockbox": "0x8052E39b6558F1b897525AAD694181930AF0Cc63",
-        "lockbox_adapter": "0x0B52cA1406eeA3Ce1fcc37dC0121845eF1de3Ae8"
+        "symbol": "oLIT"
       }
     ]
   }
