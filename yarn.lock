@@ -208,10 +208,10 @@
     secp256k1 "4.0.3"
     sinon-chai "3.7.0"
 
-"@connext/sdk-core@2.2.0-alpha.3":
-  version "2.2.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.2.0-alpha.3.tgz#0875f0e0516fd7dde0ea4f9eae6dbd972e5e71d3"
-  integrity sha512-bM+Rs8fSk1jkMt7jnnSa80li21nrWcLV49lSHHgR4ohu53AHgDPVDxvj9Kz65YqWZ9OlnTjhuPuC3jJ+rUqOBA==
+"@connext/sdk-core@2.2.1-alpha.0":
+  version "2.2.1-alpha.0"
+  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.2.1-alpha.0.tgz#183672a8009de8a87ddec3267a435321f149021a"
+  integrity sha512-j1RgVfPwpICBg4AQXzVyjlLqr7s3MMF7cIgsWFj3j+rZipdqbJzA374Pn90WV1UC8uv6wH70zpN3s29KSdOFNQ==
   dependencies:
     "@connext/nxtp-txservice" "2.2.0-alpha.2"
     "@connext/nxtp-utils" "2.2.0-alpha.2"
@@ -1072,7 +1072,7 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.1.2"
 
-"@material-tailwind/react@^2.1.5":
+"@material-tailwind/react@^2.1.0":
   version "2.1.7"
   resolved "https://registry.yarnpkg.com/@material-tailwind/react/-/react-2.1.7.tgz#e9ab865f331813f2edfa086e87699fea9f192629"
   integrity sha512-cmieL3OpTAHe8FSTdgwFV66t7mMi+XOwi6TqLmrL34kk8Gf3Jo92BP6OuxDQERL84UAo7deDmE7GXogm3GqiGQ==
@@ -1688,7 +1688,7 @@
   dependencies:
     "@tanstack/query-persist-client-core" "4.36.1"
 
-"@tanstack/react-query@^4.28.0", "@tanstack/react-query@^4.36.1":
+"@tanstack/react-query@^4.28.0", "@tanstack/react-query@^4.32.6":
   version "4.36.1"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.36.1.tgz#acb589fab4085060e2e78013164868c9c785e5d2"
   integrity sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==

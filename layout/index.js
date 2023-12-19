@@ -96,6 +96,13 @@ export default ({ children, agreeToTermsUseModal = false }) => {
     () => {
       const getData = async is_interval => {
         let assets = getAssetsData()
+        if (pathname === '/[bridge]') {
+          assets = assets.map(d => {
+            const { contracts } = { ...d }
+            return { ...d, contracts: toArray(contracts).filter(c => !c.disabled_bridge) }
+          })
+        }
+
         const response = toArray(await getTokensPrice({ assets: assets.map(a => a.id) }))
         if (response.length > 0) {
           response.forEach(d => {
@@ -119,7 +126,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       const interval = setInterval(() => getData(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [],
+    [pathname],
   )
 
   // gas tokens
