@@ -985,7 +985,7 @@ export default () => {
 
                 const allowances = [
                   erc20.allowance(address, PERMIT2_ADDRESS),
-                  erc20.allowance(address, source_contract_data?.lockbox),
+                  erc20.allowance(address, source_contract_data?.lockbox_adapter),
                   xerc20.allowance(address, PERMIT2_ADDRESS),
                   xerc20.allowance(address, connext.address),
                   permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
@@ -1118,16 +1118,17 @@ export default () => {
                   if (approveXERC20TxRequest) {
                     txs.push(approveXERC20TxRequest)
                   }
-                }
-                else {
-                  // Start with 1 step for deposit and 1 step for final xcall
-                  totalSteps = 2
+                } else {
+                  // Start with 1 step for xcall
+                  totalSteps = 1
+
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
                     totalSteps += 1
                   }
-                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
+                 
+                 
+
+
 
                   // Approve ERC20 spend to Lockbox
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
@@ -1135,7 +1136,9 @@ export default () => {
                       status: 'pending',
                       message: `(${currentStep}/${totalSteps}) Please approve ERC20 to Lockbox`,
                     })
-                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? MaxUint256 : xcallParams.amount)
+
+                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox_adapter, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
+
                     setCallResponse({
                       status: 'pending',
                       message: `(${currentStep}/${totalSteps}) Approving ERC20 to Lockbox`,
@@ -1144,28 +1147,11 @@ export default () => {
                     currentStep += 1
                   }
 
-                  // Deposit into Lockbox
-                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? MaxUint256 : xcallParams.amount])
-                  const depositTxRequest = {
-                    to: source_contract_data?.lockbox,
-                    data: depositData,
-                    chainId: source_chain_data?.chain_id,
-                  }
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Please deposit into Lockbox`,
-                  })
-                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
-                  })
-                  await depositTxReceipt.wait()
                   getBalances(source_chain)
-                  currentStep += 1
+
 
                   // Approve xERC20 spend to Connext
-                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, erc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
                     setCallResponse({
                       status: 'pending',
@@ -1182,7 +1168,7 @@ export default () => {
                 }
 
                 // Set xcall asset to xERC20
-                xcallParams.asset = xerc20.address
+                xcallParams.asset = erc20.address
               }
             }
 
