@@ -649,6 +649,7 @@ export default ({ useAssetChain = false }) => {
       // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
       if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
         let amountToApprove
+        console.log(source_contract_data, "prathmesh")
         try {
           amountToApprove = parseUnits(amount, source_decimals)
           console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
@@ -792,7 +793,7 @@ export default ({ useAssetChain = false }) => {
 
                 const allowances = [
                   erc20.allowance(address, PERMIT2_ADDRESS),
-                  erc20.allowance(address, source_contract_data?.lockbox),
+                  erc20.allowance(address, source_contract_data?.lockbox_adapter),
                   xerc20.allowance(address, PERMIT2_ADDRESS),
                   xerc20.allowance(address, connext.address),
                   permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
@@ -926,14 +927,12 @@ export default ({ useAssetChain = false }) => {
                     txs.push(approveXERC20TxRequest)
                   }
                 } else {
-                  // Start with 1 step for deposit and 1 step for final xcall
-                  totalSteps = 2
+                  // Start with 1 step for xcall
+                  totalSteps = 1
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
                     totalSteps += 1
                   }
-                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
-                    totalSteps += 1
-                  }
+                 
 
                   // Approve ERC20 spend to Lockbox
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
@@ -941,7 +940,7 @@ export default ({ useAssetChain = false }) => {
                       status: 'pending',
                       message: `(${currentStep}/${totalSteps}) Please approve ERC20 to Lockbox`,
                     })
-                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
+                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox_adapter, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
                     setCallResponse({
                       status: 'pending',
                       message: `(${currentStep}/${totalSteps}) Approving ERC20 to Lockbox`,
@@ -951,27 +950,13 @@ export default ({ useAssetChain = false }) => {
                   }
 
                   // Deposit into Lockbox
-                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? constants.MaxUint256 : xcallParams.amount])
-                  const depositTxRequest = {
-                    to: source_contract_data?.lockbox,
-                    data: depositData,
-                    chainId: source_chain_data?.chain_id
-                  }
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Please deposit into Lockbox`,
-                  })
-                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
-                  setCallResponse({
-                    status: 'pending',
-                    message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
-                  })
-                  await depositTxReceipt.wait()
+             
+               
                   getBalances(source_chain)
-                  currentStep += 1
+               
 
                   // Approve xERC20 spend to Connext
-                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, erc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
                     setCallResponse({
                       status: 'pending',
@@ -988,7 +973,7 @@ export default ({ useAssetChain = false }) => {
                 }
 
                 // Set xcall asset to xERC20
-                xcallParams.asset = xerc20.address
+                xcallParams.asset = erc20.address
               }
             }
 
