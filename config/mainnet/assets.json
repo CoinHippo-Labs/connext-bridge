@@ -969,7 +969,7 @@
         "symbol": "oLIT",
         "xERC20": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
         "lockbox": "0x2b3c399baEB628A29D8d636e7bC495820F9AFB4F",
-        "lockbox_adapter": "0x7831E325824621CEb14898AD494444fE08108baf"
+        "lockbox_adapter": "0x45BF3c737e57B059a5855280CA1ADb8e9606AC68"
       },
       {
         "contract_address": "0x0ffB33812FA5cd8bCE181Db3FD76E11935105B12",
@@ -978,7 +978,7 @@
         "symbol": "oLIT",
         "xERC20": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
         "lockbox": "0x8052E39b6558F1b897525AAD694181930AF0Cc63",
-        "lockbox_adapter": "0xe090c4519Cc9f96bf0155ead88F9f26FAC6fD3E0"
+        "lockbox_adapter": "0x0B52cA1406eeA3Ce1fcc37dC0121845eF1de3Ae8"
       }
     ]
   }
