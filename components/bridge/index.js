@@ -841,7 +841,6 @@ export default () => {
       // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
       if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
         let amountToApprove
-        console.log(source_contract_data, "prathmesh")
         try {
           amountToApprove = parseUnits(amount, sourceDecimals)
           console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
@@ -1127,6 +1126,9 @@ export default () => {
                     totalSteps += 1
                   }
                  
+                 
+
+
 
                   // Approve ERC20 spend to Lockbox
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
@@ -1146,7 +1148,7 @@ export default () => {
                   }
 
                   getBalances(source_chain)
-               
+
 
                   // Approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, erc20.address, xcallParams.amount, infiniteApprove)
