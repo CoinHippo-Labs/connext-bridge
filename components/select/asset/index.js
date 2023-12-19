@@ -149,18 +149,16 @@ export default (
     />
   )
 
-  return (
-    tooltip && equalsIgnoreCase(asset_data?.contract_address, contract_data?.contract_address) ?
-      <Popover open={openPopover} handler={setOpenPopover}>
-        <PopoverHandler {...triggers}>
-          <div>{component}</div>
-        </PopoverHandler>
-        <PopoverContent {...triggers} className="linkify z-50 bg-dark border-black text-white text-xs">
-          <Linkify>
-            {parse(tooltip)}
-          </Linkify>
-        </PopoverContent>
-      </Popover> :
-      component
-  )
+  return tooltip && equalsIgnoreCase(asset_data?.contract_address, contract_data?.contract_address) ?
+    <Popover open={openPopover} handler={setOpenPopover}>
+      <PopoverHandler {...triggers}>
+        <div>{component}</div>
+      </PopoverHandler>
+      <PopoverContent {...triggers} className="linkify z-50 bg-dark border-black text-white text-xs">
+        <Linkify>
+          {parse(tooltip)}
+        </Linkify>
+      </PopoverContent>
+    </Popover> :
+    component
 }

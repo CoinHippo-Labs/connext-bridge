@@ -12,6 +12,7 @@ export default (
     buttonTitle,
     buttonClassName,
     buttonStyle = {},
+    ignoreSVG = false,
     title,
     icon,
     body,
@@ -37,11 +38,12 @@ export default (
 
   const modalRef = useRef(null)
 
-  const show = () => {
+  const show = e => {
+    const open = !ignoreSVG || !e.target.toString().includes('SVG')
     if (onClick) {
-      onClick(true)
+      onClick(open)
     }
-    setOpen(true)
+    setOpen(open)
   }
 
   const hide = () => {

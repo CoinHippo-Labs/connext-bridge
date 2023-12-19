@@ -16,6 +16,7 @@ export default (
     height = 24,
     noCopy = false,
     noImage = false,
+    ellipseLength = 10,
     url,
     fallback,
     className = '',
@@ -67,21 +68,21 @@ export default (
       className={className || 'cursor-pointer normal-case text-base 3xl:text-2xl font-medium'}
     >
       <span className="xl:hidden">
-        {ellipse(name, 10)}
+        {ellipse(name, ellipseLength)}
       </span>
       <span className="hidden xl:block">
-        {ellipse(name, 10)}
+        {ellipse(name, ellipseLength)}
       </span>
     </span>
   )
 
   const addressComponent = fallback || (
-    <span className={className || 'cursor-pointer normal-case text-sm 3xl:text-base font-medium'}>
+    <span className={className || 'cursor-pointer normal-case text-base 3xl:text-2xl font-medium'}>
       <span className="xl:hidden">
-        {ellipse(address, 10, '0x')}
+        {ellipse(address, ellipseLength, '0x')}
       </span>
       <span className="hidden xl:block">
-        {ellipse(address, 10, '0x')}
+        {ellipse(address, ellipseLength, '0x')}
       </span>
     </span>
   )

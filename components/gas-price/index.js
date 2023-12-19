@@ -39,22 +39,20 @@ export default ({ chainId, dummy, iconSize = 20, className = '' }) => {
     [chainId, rpcs],
   )
 
-  return (
-    chainId ?
-      <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
-        <MdLocalGasStation size={iconSize} className="3xl:w-6 3xl:h-6" />
-        {typeof gasPrice === 'number' ?
-          <NumberDisplay
-            value={gasPrice}
-            suffix=" Gwei"
-            noTooltip={true}
-            className="whitespace-nowrap font-semibold"
-          /> :
-          typeof gasPrice === 'string' ?
-            <span>-</span> :
-            <div><Spinner name="RotatingSquare" width={16} height={16} /></div>
-        }
-      </div> :
-      dummy && <div className="h-5" />
-  )
+  return chainId ?
+    <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
+      <MdLocalGasStation size={iconSize} className="3xl:w-6 3xl:h-6" />
+      {typeof gasPrice === 'number' ?
+        <NumberDisplay
+          value={gasPrice}
+          suffix=" Gwei"
+          noTooltip={true}
+          className="whitespace-nowrap font-semibold"
+        /> :
+        typeof gasPrice === 'string' ?
+          <span>-</span> :
+          <div><Spinner name="RotatingSquare" width={16} height={16} /></div>
+      }
+    </div> :
+    dummy && <div className="h-5" />
 }
