@@ -956,5 +956,29 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "olit",
+    "symbol": "oLIT",
+    "name": "LIT Call Option Token",
+    "image": "/logos/assets/olit.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x627fee87d0D9D2c55098A06ac805Db8F98B158Aa",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "oLIT",
+        "xERC20": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
+        "lockbox": "0x2b3c399baEB628A29D8d636e7bC495820F9AFB4F",
+        "lockbox_adapter": "0x45BF3c737e57B059a5855280CA1ADb8e9606AC68"
+      },
+      {
+        "contract_address": "0x24F21b1864d4747a5c99045c96dA11DBFDa378f7",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "oLIT"
+      }
+    ]
   }
 ]
