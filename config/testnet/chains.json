@@ -118,5 +118,63 @@
     "color": "#1d1d1d",
     "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45",
     "no_staging": true
+  },
+  {
+    "id": "polygon-zkevm",
+    "chain_id": 1442,
+    "domain_id": "1887071092",
+    "name": "Polygon zkEVM",
+    "short_name": "POLYZK",
+    "rpcs": [
+      "https://polygon-zkevm-testnet.blockpi.network/v1/rpc/public",
+      "https://rpc.public.zkevm-test.net"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Polygonscan",
+      "url": "https://testnet-zkevm.polygonscan.com",
+      "icon": "/logos/explorers/polygonscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/polygon-zkevm.png",
+    "color": "#8247e5",
+    "unwrapper_contract": ""
+  },
+  {
+    "id": "zksync",
+    "chain_id": 280,
+    "domain_id": "2053862260",
+    "name": "ZKSync",
+    "short_name": "ZKSYNC",
+    "rpcs": [
+      "https://zksync-era-testnet.blockpi.network/v1/rpc",
+      "https://testnet.era.zksync.dev"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "ZKSync",
+      "url": "https://goerli.explorer.zksync.io",
+      "icon": "/logos/explorers/zksync.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/address/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/zksync.png",
+    "color": "#12142b",
+    "unwrapper_contract": ""
   }
 ]
