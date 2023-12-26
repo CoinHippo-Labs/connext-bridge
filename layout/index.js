@@ -190,11 +190,21 @@ export default ({ children, agreeToTermsUseModal = false }) => {
     [chains_data],
   )
 
+  // address
+  useEffect(
+    () => {
+      if (!address && currentAddress) {
+        setCurrentAddress(null)
+      }
+    },
+    [address, currentAddress],
+  )
+
   // sdk
   useEffect(
     () => {
       const init = async () => {
-        if (!sdk && chains_data && assets_data) {
+        if ((!sdk || !equalsIgnoreCase(address, currentAddress)) && chains_data && assets_data) {
           const chains = {}
           for (const chain_data of chains_data) {
             const { chain_id, domain_id, private_rpcs, disabled } = { ...chain_data }
@@ -222,13 +232,16 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             logLevel: 'info',
             chains,
           }
+          if (address) {
+            sdkConfig.signerAddress = address
+          }
           console.log('[General]', '[SDK config]', sdkConfig)
           dispatch({ type: SDK, value: await create(sdkConfig) })
         }
       }
       init()
     },
-    [chains_data, assets_data, sdk],
+    [chains_data, assets_data, sdk, signer, address, currentAddress],
   )
 
   // sdk change signer
