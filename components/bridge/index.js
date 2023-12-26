@@ -826,6 +826,7 @@ export default () => {
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
         [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayerFeeDecimals - 2), relayerFeeDecimals) : undefined,
+        options: { signerAddress: address },
       }
       console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
 
