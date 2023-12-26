@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, optimism, optimismGoerli, arbitrum, arbitrumGoerli, fantom, fantomTestnet, moonbeam, moonbaseAlpha, gnosis, linea, lineaTestnet, zkSync, zkSyncTestnet } from 'wagmi/chains'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, optimism, optimismGoerli, arbitrum, arbitrumGoerli, fantom, fantomTestnet, moonbeam, moonbaseAlpha, gnosis, linea, lineaTestnet, polygonZkEvm, polygonZkEvmTestnet, zkSync, zkSyncTestnet } from 'wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
@@ -16,6 +16,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'moonbeam', ...moonbeam },
     { _id: 'gnosis', ...gnosis },
     { _id: 'linea', ...linea },
+    { _id: 'polygon-zkevm', ...polygonZkEvm },
     { _id: 'zksync', ...zkSync },
   ] :
   [
@@ -28,6 +29,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'fantom', ...fantomTestnet },
     { _id: 'moonbeam', ...moonbaseAlpha },
     { _id: 'linea', ...lineaTestnet },
+    { _id: 'polygon-zkevm', ...polygonZkEvmTestnet },
     { _id: 'zksync', ...zkSyncTestnet },
   ]
 
