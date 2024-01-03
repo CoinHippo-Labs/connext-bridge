@@ -74,6 +74,7 @@
         "contract_address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
         "chain_id": 137,
         "decimals": 6,
+        "symbol": "USDC.e",
         "image": "/logos/assets/usdc.png",
         "next_asset": {
           "contract_address": "0xF96C6d2537e1af1a9503852eB2A4AF264272a5B6",
@@ -87,6 +88,7 @@
         "contract_address": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         "chain_id": 10,
         "decimals": 6,
+        "symbol": "USDC.e",
         "image": "/logos/assets/usdc.png",
         "next_asset": {
           "contract_address": "0x67E51f46e8e14D4E4cab9dF48c59ad8F512486DD",
