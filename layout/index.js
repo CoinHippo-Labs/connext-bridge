@@ -369,7 +369,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             let { price } = { ...getAssetData(asset_data.id, assets_data) }
             price = price || 0
             if (isNumber(supply) || (adopted?.balance && local?.balance)) {
-              tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * price
+              tvl = Number(_.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance))) || supply) * price
             }
 
             if (pool && (IS_STAGING || ENVIRONMENT === 'production')) {

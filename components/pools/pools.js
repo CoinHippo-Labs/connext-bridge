@@ -34,7 +34,7 @@ export default ({ view, userPools }) => {
         share = isNumber(supply) ? lpTokenBalance * 100 / supply : share
         let { price } = { ...getAssetData(asset_data?.id, assets_data) }
         price = price || 0
-        const tvl = (supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * price
+        const tvl = Number(_.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance))) || supply) * price
         const value = lpTokenBalance * price
         const chain = chain_data?.id
         const asset = asset_data?.id
