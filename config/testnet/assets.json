@@ -54,6 +54,13 @@
         "decimals": 18,
         "symbol": "TEST",
         "mintable": true
+      },
+      {
+        "contract_address": "0x471F702E7D96E541488140042bCD1206Ae55CCa5",
+        "chain_id": 195,
+        "decimals": 18,
+        "symbol": "TEST",
+        "mintable": true
       }
     ],
     "color": "#2675c8",
