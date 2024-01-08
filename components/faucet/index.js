@@ -71,7 +71,7 @@ export default (
   const { balances_data } = { ...balances }
 
   const [data, setData] = useState(null)
-  const [collapse, setCollapse] = useState(true)
+  const [collapse, setCollapse] = useState(false)
   const [minting, setMinting] = useState(null)
   const [mintResponse, setMintResponse] = useState(null)
   const [withdrawing, setWithdrawing] = useState(null)

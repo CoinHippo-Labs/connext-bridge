@@ -31,6 +31,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'linea', ...lineaTestnet },
     { _id: 'polygon-zkevm', ...polygonZkEvmTestnet },
     { _id: 'zksync', ...zkSyncTestnet },
+    { _id: 'x1', id: 195, network: 'x1', name: 'X1', nativeCurrency: { name: 'OKB', symbol: 'OKB', decimals: 18 }, rpcUrls: { default: { http: ['https://x1testrpc.okx.com'] }, public: { http: ['https://x1testrpc.okx.com'] }, infura: { http: ['https://x1testrpc.okx.com'] } }, blockExplorers: { default: { name: 'X1', url: 'https://www.oklink.com/x1-test' } } },
   ]
 
 export const queryClient = new QueryClient()
