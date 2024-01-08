@@ -47,13 +47,13 @@
     stream-browserify "^3.0.0"
     util "^0.12.4"
 
-"@connext/nxtp-txservice@2.2.0-alpha.2":
-  version "2.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@connext/nxtp-txservice/-/nxtp-txservice-2.2.0-alpha.2.tgz#0d73c4aa09f9ac807de9a506b5e2d77970b49ed8"
-  integrity sha512-2p42qlrrGgVDBvk0OxVJkjMpDwqloF4fN1NdW2oVQpF7G58zPGwm4kAPCJSAdG8M7Ly59oKQxkBVX1qPvj04eg==
+"@connext/nxtp-txservice@2.2.2-alpha.3":
+  version "2.2.2-alpha.3"
+  resolved "https://registry.yarnpkg.com/@connext/nxtp-txservice/-/nxtp-txservice-2.2.2-alpha.3.tgz#4d6ff19d1d37f322afd8b3cbbcf9452c54781e7c"
+  integrity sha512-K7KGQLAKlaWKvdt7aNPOBurAP4lTX9vMHX1DbBEIU6xGCEfdKt7JBRzlaa+A50Xf6JrABpSzreWtJC0FZdKYww==
   dependencies:
-    "@connext/nxtp-utils" "2.2.0-alpha.2"
-    "@connext/smart-contracts" "2.2.0-alpha.2"
+    "@connext/nxtp-utils" "2.2.2-alpha.3"
+    "@connext/smart-contracts" "2.2.2-alpha.3"
     "@sinclair/typebox" "0.25.21"
     ajv "8.12.0"
     ajv-formats "2.1.1"
@@ -62,10 +62,10 @@
     interval-promise "1.4.0"
     p-queue "6.6.2"
 
-"@connext/nxtp-utils@2.2.0-alpha.2":
-  version "2.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@connext/nxtp-utils/-/nxtp-utils-2.2.0-alpha.2.tgz#06168aa83c6bb666483e629b27af45ee407b7e35"
-  integrity sha512-9TrNHIIOq3iDOfLmtp2jjiFdOqksXARIJEG7AvzjyK5Ek/DoyD7u0tjwRcuuFMP/NcaQkQKHRGCfC5PUBnKQmQ==
+"@connext/nxtp-utils@2.2.2-alpha.3":
+  version "2.2.2-alpha.3"
+  resolved "https://registry.yarnpkg.com/@connext/nxtp-utils/-/nxtp-utils-2.2.2-alpha.3.tgz#8460fbdc5b7c5dba3864057816f7ad7a8c3190c6"
+  integrity sha512-LB7Wrh0G75f2hkTMS+GMA5Vb7Ufe/G1ODy+ERBjj0rziB0dUR2LmILEHInWGciou+lUnZH63Q2MZFpGrA9mgSg==
   dependencies:
     "@maticnetwork/maticjs" "3.6.6"
     "@maticnetwork/maticjs-web3" "1.0.4"
@@ -84,23 +84,23 @@
     secp256k1 "4.0.3"
     sinon-chai "3.7.0"
 
-"@connext/sdk-core@2.2.2-alpha.1":
-  version "2.2.2-alpha.1"
-  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.2.2-alpha.1.tgz#9c5a21763bdacfc14e9e8c12d058841877e9cf4d"
-  integrity sha512-owgZQpHD3y2sdglAw1fX1jI7N+OCVFPObmVdiiwCFbGSpgko/41LXEj203eoGLWPCcj2usS08wFf7GNB7DSa0Q==
+"@connext/sdk-core@2.2.2-alpha.3":
+  version "2.2.2-alpha.3"
+  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.2.2-alpha.3.tgz#7a242454cdcb2c511a79fac23c5494c0ec6d084f"
+  integrity sha512-ksYn5WGG9nD8gyovR9xP9UfVNaZF+nSF13dzS5DKMyPFJL0+5LpkzUAaNKGiQh1TN1MRYG8sOgTQfzZjFK9jEQ==
   dependencies:
-    "@connext/nxtp-txservice" "2.2.0-alpha.2"
-    "@connext/nxtp-utils" "2.2.0-alpha.2"
+    "@connext/nxtp-txservice" "2.2.2-alpha.3"
+    "@connext/nxtp-utils" "2.2.2-alpha.3"
     "@sinclair/typebox" "0.25.21"
     ethers "5.7.2"
     isomorphic-fetch "3.0.0"
     memoizee "0.4.15"
     typedoc "0.23.25"
 
-"@connext/smart-contracts@2.2.0-alpha.2":
-  version "2.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@connext/smart-contracts/-/smart-contracts-2.2.0-alpha.2.tgz#ed5efad49a1858320968637f4c7fa830bf6cad26"
-  integrity sha512-M6T/EOzC+RLsccJRxYdVRY9SlSVcI/SUQVoBQEZZ3+p772v2XMmj7RCJPHm/IkDRjGkD5DUuOBDZvTaeqGF4hQ==
+"@connext/smart-contracts@2.2.2-alpha.3":
+  version "2.2.2-alpha.3"
+  resolved "https://registry.yarnpkg.com/@connext/smart-contracts/-/smart-contracts-2.2.2-alpha.3.tgz#d74be54f56b936a27b0e4182c29f0d5adea81c29"
+  integrity sha512-/ciLI2ncBWdva3ubSO55PoANTXzwOXxl7J4FLRdaNWhsyojVCpZPZMU0hmYLLTI0IZF4p+Nu1LYGG2ngNBX8wg==
   dependencies:
     "@eth-optimism/sdk" "2.1.0"
 
