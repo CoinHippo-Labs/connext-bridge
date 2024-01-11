@@ -357,7 +357,7 @@ export default (
                 <button
                   disabled={disabled || wrap_disabled || !signer}
                   onClick={() => mint()}
-                  className={`${disabled || wrap_disabled || !signer ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                  className={`${!signer ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed text-slate-400 dark:text-slate-500' : disabled || wrap_disabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'} rounded flex items-center font-semibold space-x-1.5 py-2 px-3`}
                 >
                   {minting && <div><Spinner width={18} height={18} color="white" /></div>}
                   {is_wrapped ?
@@ -375,7 +375,7 @@ export default (
                   <button
                     disabled={disabled || unwrap_disabled}
                     onClick={() => withdraw()}
-                    className={`${disabled || unwrap_disabled ? 'bg-red-400 dark:bg-red-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                    className={`${!signer ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed text-slate-400 dark:text-slate-500' : disabled || unwrap_disabled ? 'bg-red-400 dark:bg-red-500 cursor-not-allowed text-white' : 'bg-red-600 hover:bg-red-700 text-white'} rounded flex items-center font-semibold space-x-1.5 py-2 px-3`}
                   >
                     {withdrawing && <div><Spinner width={18} height={18} color="white" /></div>}
                     <span>Unwrap</span>
