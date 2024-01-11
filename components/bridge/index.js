@@ -33,7 +33,7 @@ import TimeSpent from '../time/timeSpent'
 import Wallet from '../wallet'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
-import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
+import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_SOURCE_CHAIN, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
@@ -309,7 +309,7 @@ export default () => {
       }
 
       if (Object.keys(bridge).length > 0 || asPath === '/') {
-        source_chain = source_chain || getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: destination_chain })?.id
+        source_chain = source_chain || DEFAULT_SOURCE_CHAIN || getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: destination_chain })?.id
         const source_chain_data = getChainData(source_chain, chains_data)
         source_chain = source_chain_data?.disabled_bridge && source_chain_data.switch_to ? source_chain_data.switch_to : source_chain
 
@@ -331,7 +331,7 @@ export default () => {
           destination_chain = DEFAULT_DESTINATION_CHAIN
         }
         else {
-          destination_chain = getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: source_chain })?.id
+          destination_chain = DEFAULT_DESTINATION_CHAIN || getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: source_chain })?.id
         }
       }
 
@@ -2330,7 +2330,7 @@ export default () => {
               </div>
             }
           </div>
-          {!openTransferStatus && original_source_contract_data?.mintable && <Faucet tokenId={asset} contractData={original_source_contract_data} />}
+          {!openTransferStatus && original_source_contract_data?.mintable && <Faucet tokenId={asset} contractData={original_source_contract_data} defaultChain={source_chain} />}
           {!openTransferStatus && original_source_contract_data?.xERC20 && !calling && !callResponse && pendingTransfers.findIndex(d => [d.origin_bridged_asset, d.origin_transacting_asset].findIndex(a => equalsIgnoreCase(a, original_source_contract_data.xERC20)) > -1) < 0 && (
             <div className="max-w-md 3xl:max-w-xl">
               <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
