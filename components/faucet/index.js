@@ -58,6 +58,7 @@ export default (
     tokenId = 'test',
     faucetAmount = 1000,
     contractData,
+    defaultChain,
     titleClassName = '',
     className = '',
   },
@@ -83,7 +84,7 @@ export default (
       if (chain_id && address) {
         const { chain } = { ...data }
         const { id } = { ...getChainData(chain_id, chains_data) }
-        setData({ ...data, chain: id || chain, address: data ? data.address : address })
+        setData({ ...data, chain: id || chain || defaultChain, address: data ? data.address : address })
       }
     },
     [chain_id, address],
