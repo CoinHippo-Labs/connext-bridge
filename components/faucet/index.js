@@ -81,10 +81,10 @@ export default (
 
   useEffect(
     () => {
-      if (chain_id && address) {
+      if (!signer || (chain_id && address)) {
         const { chain } = { ...data }
         const { id } = { ...getChainData(chain_id, chains_data) }
-        setData({ ...data, chain: id || chain || defaultChain, address: data ? data.address : address })
+        setData({ ...data, chain: id || chain || defaultChain, address: data ? data.address || address : address })
       }
     },
     [chain_id, address],
@@ -233,13 +233,13 @@ export default (
         onClick={() => setCollapse(!collapse)}
         className={`w-full flex items-center justify-center text-base font-semibold space-x-1.5 ${titleClassName}`}
       >
-        {!signer && (
+        {!signer && is_wrapped && (
           <span className="whitespace-nowrap text-xs sm:text-base 3xl:text-2xl font-medium">
             Connect wallet to
           </span>
         )}
         <span className="whitespace-nowrap text-xs sm:text-base 3xl:text-2xl font-medium">
-          {is_wrapped ? `Wrap or unwrap ${symbol}` : 'Faucet'}
+          {is_wrapped ? `Wrap or unwrap ${symbol}` : `Get ${symbol} tokens`}
         </span>
         {collapse ? <BiChevronDown size={18} /> : <BiChevronUp size={18} />}
       </button>
@@ -328,7 +328,7 @@ export default (
                 onClick={
                   () => {
                     const { id } = { ...getChainData(chain_id, chains_data) }
-                    setData({ ...data, chain: id, address })
+                    setData({ ...data, chain: id || defaultChain, address })
                     setCollapse(!collapse)
                   }
                 }
