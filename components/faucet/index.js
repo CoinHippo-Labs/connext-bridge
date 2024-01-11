@@ -321,71 +321,69 @@ export default (
               </div>
             )
           })}
-          {signer && has_all_fields && (
-            <div className="flex justify-end space-x-2 mb-2">
-              <button
-                disabled={disabled}
-                onClick={
-                  () => {
-                    const { id } = { ...getChainData(chain_id, chains_data) }
-                    setData({ ...data, chain: id || defaultChain, address })
-                    setCollapse(!collapse)
-                  }
+          <div className="flex justify-end space-x-2 mb-2">
+            <button
+              disabled={disabled}
+              onClick={
+                () => {
+                  const { id } = { ...getChainData(chain_id, chains_data) }
+                  setData({ ...data, chain: id || defaultChain, address })
+                  setCollapse(!collapse)
                 }
-                className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded font-medium py-2 px-3`}
-              >
-                Cancel
-              </button>
-              {chain_data?.chain_id !== chain_id ?
-                <Wallet
-                  connectChainId={chain_data?.chain_id}
-                  className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
-                >
-                  <span>Switch to</span>
-                  {image && (
-                    <Image
-                      src={image}
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span className="font-medium">
-                    {chain_data?.name}
-                  </span>
-                </Wallet> :
-                <>
-                  <button
-                    disabled={disabled || wrap_disabled}
-                    onClick={() => mint()}
-                    className={`${disabled || wrap_disabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
-                  >
-                    {minting && <div><Spinner width={18} height={18} color="white" /></div>}
-                    {is_wrapped ?
-                      <span>Wrap</span> :
-                      <>
-                        <span>Faucet</span>
-                        <span className="font-semibold">
-                          {faucetAmount}
-                        </span>
-                        <span>{contractData?.symbol || symbol}</span>
-                      </>
-                    }
-                  </button>
-                  {is_wrapped && (
-                    <button
-                      disabled={disabled || unwrap_disabled}
-                      onClick={() => withdraw()}
-                      className={`${disabled || unwrap_disabled ? 'bg-red-400 dark:bg-red-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
-                    >
-                      {withdrawing && <div><Spinner width={18} height={18} color="white" /></div>}
-                      <span>Unwrap</span>
-                    </button>
-                  )}
-                </>
               }
-            </div>
-          )}
+              className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded font-medium py-2 px-3`}
+            >
+              Cancel
+            </button>
+            {signer && chain_data?.chain_id !== chain_id ?
+              <Wallet
+                connectChainId={chain_data?.chain_id}
+                className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
+              >
+                <span>Switch to</span>
+                {image && (
+                  <Image
+                    src={image}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                )}
+                <span className="font-medium">
+                  {chain_data?.name}
+                </span>
+              </Wallet> :
+              <>
+                <button
+                  disabled={disabled || wrap_disabled || !signer}
+                  onClick={() => mint()}
+                  className={`${disabled || wrap_disabled || !signer ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                >
+                  {minting && <div><Spinner width={18} height={18} color="white" /></div>}
+                  {is_wrapped ?
+                    <span>Wrap</span> :
+                    <>
+                      <span>Faucet</span>
+                      <span className="font-semibold">
+                        {faucetAmount}
+                      </span>
+                      <span>{contractData?.symbol || symbol}</span>
+                    </>
+                  }
+                </button>
+                {is_wrapped && (
+                  <button
+                    disabled={disabled || unwrap_disabled}
+                    onClick={() => withdraw()}
+                    className={`${disabled || unwrap_disabled ? 'bg-red-400 dark:bg-red-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                  >
+                    {withdrawing && <div><Spinner width={18} height={18} color="white" /></div>}
+                    <span>Unwrap</span>
+                  </button>
+                )}
+              </>
+            }
+          </div>
         </div>
       )}
       {callResponse && (
