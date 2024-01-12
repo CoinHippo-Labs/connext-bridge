@@ -467,5 +467,29 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  },
+  {
+    "id": "sDAI",
+    "symbol": "sDAI",
+    "name": "Savings DAI",
+    "image": "/logos/assets/sdai.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xD8134205b0328F5676aaeFb3B2a0DC15f4029d8C",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "sDAI",
+        "xERC20": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
+        "lockbox": "0x2783d6aB802F4a0F29e05aBe766840837972aB15",
+        "lockbox_adapter": "0x82aDad4d1e91e0C569A16C4cE1DA0046173ee0A7"
+      },
+      {
+        "contract_address": "0x110753D17A81fc7B4eA994abaCA3270f9B6Fe2BA",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "sDAI"
+      }
+    ]
   }
 ]
