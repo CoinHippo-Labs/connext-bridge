@@ -981,5 +981,29 @@
         "symbol": "oLIT"
       }
     ]
-  }
+  },
+  {
+  "id": "ESX",
+  "symbol": "ESX",
+  "name": "EstateX",
+  "image": "/logos/assets/esx.png",
+  "is_xERC20": true,
+  "contracts": [
+    {
+      "contract_address": "0x5eeee8b304ad51447736f74a5675c2cb070e52a7",
+      "chain_id": 80001,
+      "decimals": 9,
+      "symbol": "ESX",
+      "xERC20": "0x07d086Cc91BD3aad22C6ff76AFF6aefe15763258",
+      "lockbox": "0xEFA4aFB78F250128e10F748bdA9aBB64f1e9F978",
+      "lockbox_adapter": "0x3eEb23a1799C20644835A36e0AD6eC1D3464c009"
+    },
+    {
+      "contract_address": "0x5EEee8B304Ad51447736F74A5675c2cB070e52A7",
+      "chain_id": 5,
+      "decimals": 9,
+      "symbol": "ESX"
+    }
+  ]
+}
 ]
