@@ -10,7 +10,7 @@ export async function getStaticPaths() {
   const chains = toArray(getChainsData().map(c => c.id))
   const assets = _.concat(toArray(getAssetsData().map(a => a.id)), '')
   return {
-    paths: assets.flatMap(a => chains.map(c => `/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)),
+    paths: assets.flatMap(a => chains.flatMap(c => [`/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`, `/swap/${a ? `${a}-` : ''}on-${c}`])),
     fallback: false,
   }
 }
