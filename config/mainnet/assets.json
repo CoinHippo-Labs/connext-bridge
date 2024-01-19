@@ -336,7 +336,8 @@
       }
     ],
     "color": "#f4b333",
-    "preset": true
+    "preset": true,
+    "exclude_destination_chains": ["gnosis"]
   },
   {
     "id": "eth",
