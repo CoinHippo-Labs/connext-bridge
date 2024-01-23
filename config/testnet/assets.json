@@ -481,11 +481,11 @@
         "decimals": 18,
         "symbol": "sDAI",
         "xERC20": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
-        "lockbox": "0x2783d6aB802F4a0F29e05aBe766840837972aB15",
+        "lockbox": "0x097B2A7f498dc4A5817e2A58D962FA7284FEECa9",
         "lockbox_adapter": "0x82aDad4d1e91e0C569A16C4cE1DA0046173ee0A7"
       },
       {
-        "contract_address": "0x110753D17A81fc7B4eA994abaCA3270f9B6Fe2BA",
+        "contract_address": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
         "chain_id": 80001,
         "decimals": 18,
         "symbol": "sDAI"
