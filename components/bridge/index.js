@@ -632,6 +632,7 @@ export default () => {
           isHighPriority: !forceSlow,
           priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
           destinationGasPrice: gas_price,
+          signerAddress: address
         }
 
         if (NETWORK !== 'mainnet') {
@@ -709,7 +710,7 @@ export default () => {
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(id => toArray(pools_data).find(d => d.chain_data?.id === id && !d.tvl)) < 0) {
             const startTime = moment()
             console.log('[/]', '[calculateAmountReceived]', { startTime: startTime.format(), originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
-            const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, checkFastLiquidity)
+            const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, checkFastLiquidity, address)
             const endTime = moment()
             const timeSpentMilliseconds = endTime.diff(startTime, 'milliseconds')
             console.log('[/]', '[amountReceived]', { startTime: startTime.format(), endTime: endTime.format(), timeSpentMilliseconds, originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity, response })

@@ -220,6 +220,7 @@ export default (
               isHighPriority: true,
               priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
               destinationGasPrice: gas_price,
+              signerAddress: address
             }
             if (NETWORK !== 'mainnet') {
               const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
@@ -274,7 +275,7 @@ export default (
         setEstimateResponse(null)
         if (BigInt(amount) > 0) {
           console.log('[action required]', '[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset })
-          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset)
+          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, address)
           console.log('[action required]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, response })
           _estimatedValues = Object.fromEntries(
             Object.entries({ ...response }).map(([k, v]) => {
