@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import PageVisibility from 'react-page-visibility'
-import { create } from '@connext/sdk-core'
+import { create } from '@connext/sdk'
 import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
 import _ from 'lodash'
