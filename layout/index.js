@@ -241,7 +241,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       }
       init()
     },
-    [chains_data, assets_data, sdk, signer, address, currentAddress],
+    [chains_data, assets_data, signer, address, currentAddress],
   )
 
   // sdk change signer
