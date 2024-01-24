@@ -482,7 +482,7 @@
         "symbol": "sDAI",
         "xERC20": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
         "lockbox": "0x097B2A7f498dc4A5817e2A58D962FA7284FEECa9",
-        "lockbox_adapter": "0x82aDad4d1e91e0C569A16C4cE1DA0046173ee0A7"
+        "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
       },
       {
         "contract_address": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
