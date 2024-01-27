@@ -469,6 +469,32 @@
     "group": "other_tokens"
   },
   {
+    "id": "sDAI",
+    "symbol": "sDAI",
+    "name": "Savings DAI",
+    "image": "/logos/assets/sdai.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xD8134205b0328F5676aaeFb3B2a0DC15f4029d8C",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "sDAI",
+        "xERC20": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
+        "lockbox": "0x097B2A7f498dc4A5817e2A58D962FA7284FEECa9",
+        "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
+      },
+      {
+        "contract_address": "0x272DF088C3bDafeDCa5f66D76B1372A6091eFc64",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "sDAI"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
     "id": "esx",
     "symbol": "ESX",
     "name": "EstateX",
