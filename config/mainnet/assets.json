@@ -138,6 +138,19 @@
           "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
+      },
+      {
+        "contract_address": "0xEA32A96608495e54156Ae48931A7c20f0dcc1a21",
+        "chain_id": 1835365481,
+        "decimals": 6,
+        "image": "/logos/assets/usdc.png",
+        "next_asset": {
+          "contract_address": "0x9ac9aD5A82Ccd0Ab7584a037A7A2334Dc3715Be2",
+          "decimals": 6,
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
+        },
+        "is_pool": true
       }
     ],
     "color": "#2675c8",
@@ -229,6 +242,19 @@
         "image": "/logos/assets/usdt.png",
         "next_asset": {
           "contract_address": "0xbd7eaed30936670c931b718f5d9014aff82fc767",
+          "decimals": 6,
+          "symbol": "nextUSDT",
+          "image": "/logos/assets/nextusdt.png"
+        },
+        "is_pool": true
+      },
+      {
+        "contract_address": "0xbB06DCA3AE6887fAbF931640f67cab3e3a16F4dC",
+        "chain_id": 1835365481,
+        "decimals": 6,
+        "image": "/logos/assets/usdt.png",
+        "next_asset": {
+          "contract_address": "0xa6A8d22D5da43C9f6E5cF7b4e50941784e70F688",
           "decimals": 6,
           "symbol": "nextUSDT",
           "image": "/logos/assets/nextusdt.png"
@@ -434,6 +460,21 @@
         "image": "/logos/assets/weth.png",
         "next_asset": {
           "contract_address": "0x0573ad07ca4f74757e5b2417bf225bebebcf66d9",
+          "decimals": 18,
+          "symbol": "nextWETH",
+          "image": "/logos/assets/nextweth.png"
+        },
+        "wrappable": true,
+        "is_pool": true
+      },
+      {
+        "contract_address": "0x420000000000000000000000000000000000000a",
+        "chain_id": 59144,
+        "decimals": 18,
+        "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
+        "next_asset": {
+          "contract_address": "0x3883B5Bdd61BA1b687de69eE50c9738D5ec501E9",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
