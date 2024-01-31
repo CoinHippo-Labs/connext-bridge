@@ -141,7 +141,7 @@
       },
       {
         "contract_address": "0xEA32A96608495e54156Ae48931A7c20f0dcc1a21",
-        "chain_id": 1835365481,
+        "chain_id": 1088,
         "decimals": 6,
         "image": "/logos/assets/usdc.png",
         "next_asset": {
@@ -250,7 +250,7 @@
       },
       {
         "contract_address": "0xbB06DCA3AE6887fAbF931640f67cab3e3a16F4dC",
-        "chain_id": 1835365481,
+        "chain_id": 1088,
         "decimals": 6,
         "image": "/logos/assets/usdt.png",
         "next_asset": {
@@ -469,7 +469,7 @@
       },
       {
         "contract_address": "0x420000000000000000000000000000000000000a",
-        "chain_id": 1835365481,
+        "chain_id": 1088,
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
