@@ -469,7 +469,7 @@
       },
       {
         "contract_address": "0x420000000000000000000000000000000000000a",
-        "chain_id": 59144,
+        "chain_id": 1835365481,
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
