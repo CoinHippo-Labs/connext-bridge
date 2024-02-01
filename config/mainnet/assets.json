@@ -319,7 +319,7 @@
         "wrappable": true,
         "is_pool": true,
         "disabled": false,
-        "disabled_bridge": true
+        "disabled_bridge": false
       },
       {
         "contract_address": "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
@@ -337,7 +337,7 @@
     ],
     "color": "#f4b333",
     "preset": true,
-    "exclude_destination_chains": ["gnosis"]
+    "exclude_destination_chains": []
   },
   {
     "id": "eth",
