@@ -206,8 +206,8 @@
     "name": "Linea",
     "short_name": "LINEA",
     "rpcs": [
-      "https://linea.blockpi.network/v1/rpc/public",
       "https://rpc.linea.build",
+      "https://linea.blockpi.network/v1/rpc/public",
       "https://1rpc.io/linea"
     ],
     "native_token": {
