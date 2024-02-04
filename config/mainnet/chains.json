@@ -229,37 +229,5 @@
     "color": "#62dfff",
     "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273",
     "group": "evm"
-  },
-  {
-    "id": "metis",
-    "is_layer_2": true,
-    "chain_id": 1088,
-    "domain_id": "1835365481",
-    "name": "Metis",
-    "short_name": "METIS",
-    "rpcs": [
-      "https://metis-pokt.nodies.app",
-      "https://metis-mainnet.public.blastapi.io",
-      "https://andromeda.metis.io/?owner=1088"
-    ],
-    "native_token": {
-      "name": "Metis",
-      "symbol": "METIS",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Metis",
-      "url": "https://andromeda-explorer.metis.io",
-      "icon": "/logos/explorers/metis.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/metis.png",
-    "color": "#00DACC",
-    "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774",
-    "group": "evm"
   }
 ]
