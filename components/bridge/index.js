@@ -2180,7 +2180,7 @@ export default () => {
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
                                       {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
-                                          {'<300 minutes'}
+                                          {'<5 hours'}
                                         </span> :
                                         <span className="text-green-600 dark:text-green-500">
                                           {'<4 minutes'}
