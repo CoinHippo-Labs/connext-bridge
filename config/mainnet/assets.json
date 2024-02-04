@@ -1023,5 +1023,34 @@
         "symbol": "oLIT"
       }
     ]
+  },
+  {
+    "id": "metis",
+    "symbol": "METIS",
+    "name": "Metis Token",
+    "image": "/logos/assets/metis.png",
+    "contracts": [
+      {
+        "contract_address": "0x9E32b13ce7f2E80A01932B42553652E053D6ed8e",
+        "chain_id": 1,
+        "decimals": 18,
+        "image": "/logos/assets/metis.png"
+      },
+      {
+        "contract_address": "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000",
+        "chain_id": 1088,
+        "decimals": 18,
+        "image": "/logos/assets/metis.png",
+        "next_asset": {
+          "contract_address": "0x1a1162304654A79B4b6A3aF0D564CA1E3cC7cc1B",
+          "decimals": 18,
+          "symbol": "nextMETIS",
+          "image": "/logos/assets/nextmetis.png"
+        },
+        "is_pool": true
+      }
+    ],
+    "color": "#2675c8",
+    "preset": true
   }
 ]
