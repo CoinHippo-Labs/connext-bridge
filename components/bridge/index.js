@@ -1546,6 +1546,14 @@ export default () => {
                             <span className="text-center">
                               Your assets are on the way! We will keep you informed.
                             </span> :
+                            (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ? 
+                            <div className="flex flex-wrap items-center justify-center space-x-1">
+                              <span>{`Your funds are on the way! \n Funds are taking our
+                              slow path as our router intent network could not
+                              boost your transfer. We estimate completion in
+                              less than 5 hours. Thank you for your patience.`}</span>
+                            </div>
+                            : 
                             <div className="flex flex-wrap items-center justify-center space-x-1">
                               <span>Your funds will arrive at the destination in about</span>
                               <TimeSpent
