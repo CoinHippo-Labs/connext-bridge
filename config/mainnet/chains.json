@@ -269,6 +269,7 @@
     "name": "Base",
     "short_name": "BASE",
     "rpcs": [
+      "https://base.llamarpc.com",
       "https://base.drpc.org",
       "https://base.publicnode.com"
     ],
