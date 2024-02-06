@@ -204,7 +204,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
   useEffect(
     () => {
       const init = async () => {
-        if ((!sdk || !equalsIgnoreCase(address, currentAddress)) && chains_data && assets_data) {
+        if (!sdk && chains_data && assets_data) {
           const chains = {}
           for (const chain_data of chains_data) {
             const { chain_id, domain_id, private_rpcs, disabled } = { ...chain_data }
@@ -241,7 +241,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       }
       init()
     },
-    [chains_data, assets_data, sdk, signer, address, currentAddress],
+    [chains_data, assets_data, sdk, address],
   )
 
   // sdk change signer
@@ -417,7 +417,34 @@ export default ({ children, agreeToTermsUseModal = false }) => {
         }
       }
 
-      const getChainData = async chain_data => pool_assets_data.forEach(a => getPool(chain_data, a))
+      const getChainData = async chain_data => {
+        const path = getPath(asPath)
+        let asset
+        switch (pathname) {
+          case '/[bridge]':
+            try {
+              const paths = split(path.replace('/', ''), 'normal', '-')
+              asset = _.head(paths) !== 'from' ? _.head(paths) : undefined
+            } catch (error) {}
+            break
+          case '/pool/[pool]':
+            try {
+              const paths = split(path.replace('/pool/', ''), 'normal', '-')
+              asset = _.head(paths) !== 'on' ? _.head(paths) : undefined
+            } catch (error) {}
+            break
+          case '/swap/[swap]':
+            try {
+              const paths = split(path.replace('/swap/', ''), 'normal', '-')
+              asset = _.head(paths) !== 'on' ? _.head(paths) : undefined
+            } catch (error) {}
+            break
+          default:
+            break
+        }
+
+        pool_assets_data.filter(a => !asset || equalsIgnoreCase(a.id, asset)).forEach(a => getPool(chain_data, a))
+      }
 
       const getData = async () => {
         if (page_visible && chains_data && pool_assets_data && sdk && pathname && !['/', '/[bridge]'].includes(pathname)) {

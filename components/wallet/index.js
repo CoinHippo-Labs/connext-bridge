@@ -137,7 +137,7 @@ export default (
           </button> :
           <button
             disabled={disabled}
-            onClick={disconnect}
+            onClick={() => disconnect()}
             className={className}
           >
             {children || (
@@ -148,7 +148,7 @@ export default (
           </button> :
         <button
           disabled={disabled}
-          onClick={open}
+          onClick={() => open()}
           className={className}
         >
           {children || (
