@@ -273,8 +273,8 @@
       "https://base.publicnode.com"
     ],
     "native_token": {
-      "name": "Metis",
-      "symbol": "METIS",
+      "name": "Ethereum",
+      "symbol": "ETH",
       "decimals": 18
     },
     "explorer": {
