@@ -238,9 +238,9 @@
     "name": "Metis",
     "short_name": "METIS",
     "rpcs": [
-      "https://metis-pokt.nodies.app",
       "https://metis-mainnet.public.blastapi.io",
-      "https://andromeda.metis.io/?owner=1088"
+      "https://metis.api.onfinality.io/public",
+      "https://metis-pokt.nodies.app"
     ],
     "native_token": {
       "name": "Metis",
