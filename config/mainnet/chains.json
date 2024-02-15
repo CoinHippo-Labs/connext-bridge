@@ -31,7 +31,6 @@
     "image": "/logos/chains/ethereum.png",
     "color": "#636890",
     "unwrapper_contract": "0x268682b7D9992aE7e2ca4A8bCc9D9655FB06056F",
-    "group": "evm",
     "no_pool": true
   },
   {
@@ -62,8 +61,7 @@
     },
     "image": "/logos/chains/binance.png",
     "color": "#e8b30b",
-    "unwrapper_contract": "0x2c7B8c1a13F2a7854B9299E4d22809A8B1E05De5",
-    "group": "evm"
+    "unwrapper_contract": "0x2c7B8c1a13F2a7854B9299E4d22809A8B1E05De5"
   },
   {
     "id": "polygon",
@@ -96,8 +94,7 @@
     },
     "image": "/logos/chains/polygon.png",
     "color": "#8247e5",
-    "unwrapper_contract": "0x7E8F8B2dA3dc5Ad9c9Dfd1A832331A039d4f3f74",
-    "group": "evm"
+    "unwrapper_contract": "0x7E8F8B2dA3dc5Ad9c9Dfd1A832331A039d4f3f74"
   },
   {
     "id": "optimism",
@@ -130,8 +127,7 @@
     },
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
-    "unwrapper_contract": "0x7Fe09d217d646a6213e51b237670Bc326188cB93",
-    "group": "optimistic_rollups"
+    "unwrapper_contract": "0x7Fe09d217d646a6213e51b237670Bc326188cB93"
   },
   {
     "id": "arbitrum",
@@ -164,8 +160,7 @@
     },
     "image": "/logos/chains/arbitrum.png",
     "color": "#28a0f0",
-    "unwrapper_contract": "0x429b9eb01362b2799131EfCC44319689b662999D",
-    "group": "optimistic_rollups"
+    "unwrapper_contract": "0x429b9eb01362b2799131EfCC44319689b662999D"
   },
   {
     "id": "gnosis",
@@ -195,8 +190,7 @@
     },
     "image": "/logos/chains/gnosis.png",
     "color": "#48a9a6",
-    "unwrapper_contract": "0x642c27a96dFFB6f21443A89b789a3194Ff8399fa",
-    "group": "evm"
+    "unwrapper_contract": "0x642c27a96dFFB6f21443A89b789a3194Ff8399fa"
   },
   {
     "id": "linea",
@@ -227,8 +221,7 @@
     },
     "image": "/logos/chains/linea.png",
     "color": "#62dfff",
-    "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273",
-    "group": "evm"
+    "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273"
   },
   {
     "id": "metis",
@@ -238,9 +231,9 @@
     "name": "Metis",
     "short_name": "METIS",
     "rpcs": [
-      "https://metis-pokt.nodies.app",
       "https://metis-mainnet.public.blastapi.io",
-      "https://andromeda.metis.io/?owner=1088"
+      "https://metis.api.onfinality.io/public",
+      "https://metis-pokt.nodies.app"
     ],
     "native_token": {
       "name": "Metis",
@@ -259,7 +252,6 @@
     },
     "image": "/logos/chains/metis.png",
     "color": "#00DACC",
-    "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774",
-    "group": "evm"
+    "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774"
   }
 ]

@@ -691,8 +691,7 @@
         }
       }
     ],
-    "color": "#000000",
-    "group": "other_tokens"
+    "color": "#000000"
   },
   {
     "id": "klp",
@@ -759,8 +758,7 @@
         }
       }
     ],
-    "color": "#000000",
-    "group": "other_tokens"
+    "color": "#000000"
   },
   {
     "id": "xoc",
@@ -791,8 +789,7 @@
         "image": "/logos/assets/xoc.png"
       }
     ],
-    "color": "#000000",
-    "group": "other_tokens"
+    "color": "#000000"
   },
   {
     "id": "p8",
@@ -808,8 +805,7 @@
         "symbol": "P8"
       }
     ],
-    "color": "#8200FF",
-    "group": "other_tokens"
+    "color": "#8200FF"
   },
   {
     "id": "fraction",
