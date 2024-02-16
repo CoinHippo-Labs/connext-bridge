@@ -253,5 +253,38 @@
     "image": "/logos/chains/metis.png",
     "color": "#00DACC",
     "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774"
+  },
+  {
+    "id": "base",
+    "chain_id": 8453,
+    "domain_id": "1650553709",
+    "name": "Base",
+    "short_name": "BASE",
+    "rpcs": [
+      "https://base.llamarpc.com",
+      "https://base.drpc.org",
+      "https://base.publicnode.com"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Base",
+      "url": "https://basescan.org/",
+      "icon": "/logos/explorers/base.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/base.png",
+    "color": "#00DACC",
+    "unwrapper_contract": "0xd0646a7F776330f5DEf68b2ed088663d8c9d921A",
+    "group": "evm",
+    "coingecko_id": "base",
+    "gas_coingecko_id": "ethereum"
   }
 ]
