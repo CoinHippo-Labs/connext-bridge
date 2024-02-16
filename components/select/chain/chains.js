@@ -40,7 +40,7 @@ export default (
   )
 
   return (
-    <div className="max-h-96 overflow-y-scroll disable-scrollbars">
+    <div className="max-h-96 overflow-y-scroll">
       {chains_data_sorted.map((d, i) => {
         const { id, name, image, group, disabled_bridge } = { ...d }
         let { disabled } = { ...d }
