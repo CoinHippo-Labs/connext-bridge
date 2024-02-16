@@ -22,12 +22,13 @@ import { formatUnits } from '../../lib/number'
 import { toArray, equalsIgnoreCase } from '../../lib/utils'
 
 export default ({ data }) => {
-  const { chains, assets, wallet, latest_bumped_transfers } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
+  const { chains, assets, wallet, latest_bumped_transfers , router_asset_balances} = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, router_asset_balances: state.router_asset_balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
   const { address } = { ...wallet_data }
   const { latest_bumped_transfers_data } = { ...latest_bumped_transfers }
+
 
   const [transferData, setTransferData] = useState(null)
 
@@ -41,7 +42,7 @@ export default ({ data }) => {
   )
 
   const { transfer_id, status, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_transacting_amount, destination_local_asset, receive_local, to, xcall_timestamp, execute_transaction_hash, routers, call_data } = { ...transferData }
-
+  const {router_asset_balances_data} = router_asset_balances
   const source_chain_data = getChainData(origin_domain, chains_data)
   const destination_chain_data = getChainData(destination_domain, chains_data)
   const { native_token, explorer, unwrapper_contract } = { ...destination_chain_data }
@@ -101,6 +102,9 @@ export default ({ data }) => {
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
   const errored = error_status === XTransferErrorStatus.LowRelayerFee && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
   const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(error_status) && toArray(latest_bumped_transfers_data).findIndex(d => equalsIgnoreCase(d.transfer_id, transfer_id) && moment().diff(moment(d.updated), 'minutes', true) <= 5) > -1
+  const destinationDecimals = (destination_contract_data?.next_asset && equalsIgnoreCase(destination_transacting_asset, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_contract_data?.decimals) || 18
+
+  const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destinationDecimals)).map(d => Number(d) > 0 ? Number(d) : 0))
 
   return transferData && (
     <div className="bg-slate-100 dark:bg-slate-900 max-w-xs sm:max-w-none rounded mx-auto py-5 px-4">
@@ -257,7 +261,11 @@ export default ({ data }) => {
                     content={routers?.length > 0 ? 'Boosted by routers.' : 'Pending router boost.'}
                   >
                     <div className="flex items-center">
-                      <BsLightningChargeFill size={16} className={`3xl:w-5 3xl:h-5 ${routers?.length > 0 ? 'text-yellow-500 dark:text-yellow-400' : 'text-blue-300 dark:text-blue-200'}`} />
+                      {
+                        (Number(source_amount) > routersLiquidityAmount) && 
+                          <BsLightningChargeFill size={16} className={`3xl:w-5 3xl:h-5 ${routers?.length > 0 ? 'text-yellow-500 dark:text-yellow-400' : 'text-blue-300 dark:text-blue-200'}`} />
+                      }
+                      
                       <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                     </div>
                   </Tooltip>
