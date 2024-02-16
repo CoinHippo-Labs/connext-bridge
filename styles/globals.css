@@ -51,8 +51,8 @@ button {
  * hide scrollbars *
  *******************/
 ::-webkit-scrollbar {
-  display: none;
-  width: 0 !important;
+  /* display: none;
+  width: 0 !important; */
 }
 .disable-scrollbars {
   scrollbar-width: none; /* Firefox */

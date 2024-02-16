@@ -64,72 +64,6 @@
     "unwrapper_contract": "0x2c7B8c1a13F2a7854B9299E4d22809A8B1E05De5"
   },
   {
-    "id": "polygon",
-    "chain_id": 137,
-    "domain_id": "1886350457",
-    "name": "Polygon",
-    "short_name": "POLY",
-    "rpcs": [
-      "https://polygon-rpc.com",
-      "https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://polygon.blockpi.network/v1/rpc/public"
-    ],
-    "private_rpcs": [
-      "https://polygon-mainnet.g.alchemy.com/v2/aA2cuymyI9ip0I1spb1nURVWdfOC5aVM"
-    ],
-    "native_token": {
-      "name": "Polygon",
-      "symbol": "MATIC",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Polygonscan",
-      "url": "https://polygonscan.com",
-      "icon": "/logos/explorers/polygonscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/polygon.png",
-    "color": "#8247e5",
-    "unwrapper_contract": "0x7E8F8B2dA3dc5Ad9c9Dfd1A832331A039d4f3f74"
-  },
-  {
-    "id": "optimism",
-    "is_layer_2": true,
-    "chain_id": 10,
-    "domain_id": "1869640809",
-    "name": "Optimism",
-    "short_name": "OP",
-    "rpcs": [
-      "https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://optimism.publicnode.com"
-    ],
-    "private_rpcs": [
-      "https://opt-mainnet.g.alchemy.com/v2/0oboZqHgeVJlfqVEl6-CoZUpESdns_4W"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "oETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Etherscan",
-      "url": "https://optimistic.etherscan.io",
-      "icon": "/logos/explorers/optimism.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/optimism.png",
-    "color": "#dc2626",
-    "unwrapper_contract": "0x7Fe09d217d646a6213e51b237670Bc326188cB93"
-  },
-  {
     "id": "arbitrum",
     "is_layer_2": true,
     "chain_id": 42161,
@@ -163,6 +97,39 @@
     "unwrapper_contract": "0x429b9eb01362b2799131EfCC44319689b662999D"
   },
   {
+    "id": "polygon",
+    "chain_id": 137,
+    "domain_id": "1886350457",
+    "name": "Polygon",
+    "short_name": "POLY",
+    "rpcs": [
+      "https://polygon-rpc.com",
+      "https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "https://polygon.blockpi.network/v1/rpc/public"
+    ],
+    "private_rpcs": [
+      "https://polygon-mainnet.g.alchemy.com/v2/aA2cuymyI9ip0I1spb1nURVWdfOC5aVM"
+    ],
+    "native_token": {
+      "name": "Polygon",
+      "symbol": "MATIC",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Polygonscan",
+      "url": "https://polygonscan.com",
+      "icon": "/logos/explorers/polygonscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/polygon.png",
+    "color": "#8247e5",
+    "unwrapper_contract": "0x7E8F8B2dA3dc5Ad9c9Dfd1A832331A039d4f3f74"
+  },
+  {
     "id": "gnosis",
     "chain_id": 100,
     "domain_id": "6778479",
@@ -191,6 +158,39 @@
     "image": "/logos/chains/gnosis.png",
     "color": "#48a9a6",
     "unwrapper_contract": "0x642c27a96dFFB6f21443A89b789a3194Ff8399fa"
+  },
+  {
+    "id": "optimism",
+    "is_layer_2": true,
+    "chain_id": 10,
+    "domain_id": "1869640809",
+    "name": "Optimism",
+    "short_name": "OP",
+    "rpcs": [
+      "https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "https://optimism.publicnode.com"
+    ],
+    "private_rpcs": [
+      "https://opt-mainnet.g.alchemy.com/v2/0oboZqHgeVJlfqVEl6-CoZUpESdns_4W"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "oETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Etherscan",
+      "url": "https://optimistic.etherscan.io",
+      "icon": "/logos/explorers/optimism.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/optimism.png",
+    "color": "#dc2626",
+    "unwrapper_contract": "0x7Fe09d217d646a6213e51b237670Bc326188cB93"
   },
   {
     "id": "linea",
