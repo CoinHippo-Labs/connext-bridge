@@ -511,5 +511,31 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "inreth",
+    "symbol": "inrETH",
+    "name": "Inception rETH",
+    "image": "/logos/assets/inrETH.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x928c4b8E677E55C2829D0B4e3BdD3aC80226527D",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "inrETH",
+        "xERC20": "0x268734Ce4610c4445b7A9d12100Fc385B97362C6",
+        "lockbox": "0xC34C8BFF1D81C8786e5F7F1fb157674fE64a138e",
+        "lockbox_adapter": "0x5ccb813eb298f09981a73853296b5a6397132c85"
+      },
+      {
+        "contract_address": "0x268734Ce4610c4445b7A9d12100Fc385B97362C6",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "inrETH"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
