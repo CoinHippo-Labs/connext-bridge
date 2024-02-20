@@ -526,7 +526,7 @@
         "symbol": "inrETH",
         "xERC20": "0x268734Ce4610c4445b7A9d12100Fc385B97362C6",
         "lockbox": "0xC34C8BFF1D81C8786e5F7F1fb157674fE64a138e",
-        "lockbox_adapter": "0x5ccb813eb298f09981a73853296b5a6397132c85"
+        "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
       },
       {
         "contract_address": "0x268734Ce4610c4445b7A9d12100Fc385B97362C6",
