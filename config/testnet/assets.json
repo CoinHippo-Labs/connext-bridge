@@ -524,8 +524,8 @@
         "chain_id": 5,
         "decimals": 18,
         "symbol": "inrETH",
-        "xERC20": "0x268734Ce4610c4445b7A9d12100Fc385B97362C6",
-        "lockbox": "0xC34C8BFF1D81C8786e5F7F1fb157674fE64a138e",
+        "xERC20": "0xa66e9339418c1e85bc957062D8D75036dB97e57B",
+        "lockbox": "0x9BE051e8F7cb7Ae7eC26aD3bc997B40b82D293D9",
         "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
       },
       {
