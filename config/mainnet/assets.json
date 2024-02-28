@@ -1075,5 +1075,31 @@
     ],
     "color": "#2675c8",
     "preset": true
+  },
+  {
+    "id": "insteth",
+    "symbol": "InstETH",
+    "name": "Inception Restaked stETH",
+    "image": "/logos/assets/instETH.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x7FA768E035F956c41d6aeaa3Bd857e7E5141CAd5",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "InstETH",
+        "xERC20": "0xb368ae21081709d03c00d7Dc51737d8abd9384e6",
+        "lockbox": "0x7Fe7409093cb6e35b78BA59756D311ac74a81355",
+        "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
+      },
+      {
+        "contract_address": "0xb368ae21081709d03c00d7Dc51737d8abd9384e6",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "InstETH"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
