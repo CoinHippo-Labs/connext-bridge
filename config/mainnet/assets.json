@@ -1090,7 +1090,7 @@
         "symbol": "ezETH",
         "xERC20": "0x2416092f143378750bb29b79eD961ab195CcEea5",
         "lockbox": "0xC8140dA31E6bCa19b287cC35531c2212763C2059",
-        "lockbox_adapter": "0xbf29a2d67efb6766e44c163b19c6f4118b164702"
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
       },
       {
         "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
