@@ -1,8 +1,31 @@
 import { QueryClient } from '@tanstack/react-query'
-import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, optimism, optimismGoerli, arbitrum, arbitrumGoerli, fantom, fantomTestnet, moonbeam, moonbaseAlpha, gnosis, linea, lineaTestnet, polygonZkEvm, polygonZkEvmTestnet, zkSync, zkSyncTestnet, metis, metisGoerli, base } from 'wagmi/chains'
+import { createWeb3Modal, defaultWagmiConfig} from '@web3modal/wagmi/react'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, optimism, optimismGoerli, arbitrum, arbitrumGoerli, fantom, fantomTestnet, moonbeam, moonbaseAlpha, gnosis, linea, lineaTestnet, polygonZkEvm, polygonZkEvmTestnet, zkSync, zkSyncTestnet, metis, metisGoerli, base, modeTestnet } from 'wagmi/chains'
+import { defineChain } from 'viem'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+
+export const mode = defineChain({
+  id: 34443,
+  name:'mode',
+  network:'mode',
+  nativeCurrency: { name:"Ether", symbol:'ETH', decimals:18 },
+  rpcUrls: {
+    default: {
+      http:['https://1rpc.io/mode']
+    },
+    public: {
+      http: ['https://mainnet.mode.network']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Mode Explorer",
+      url: 'https://explorer.mode.network/'
+    }
+  },
+  testnet: false
+})
 
 export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
   [
@@ -20,6 +43,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'zksync', ...zkSync },
     { _id: 'metis', ...metis },
     { _id: 'base', ...base },
+    {_id:'mode', ...mode}
   ] :
   [
     { _id: 'goerli', ...goerli },
@@ -35,6 +59,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'zksync', ...zkSyncTestnet },
     { _id: 'x1', id: 195, network: 'x1', name: 'X1', nativeCurrency: { name: 'OKB', symbol: 'OKB', decimals: 18 }, rpcUrls: { default: { http: ['https://x1testrpc.okx.com'] }, public: { http: ['https://x1testrpc.okx.com'] }, infura: { http: ['https://x1testrpc.okx.com'] } }, blockExplorers: { default: { name: 'X1', url: 'https://www.oklink.com/x1-test' } } },
     { _id: 'metis', ...metisGoerli },
+    { _id: 'modeTestnet', ...modeTestnet}
   ]
 
 export const queryClient = new QueryClient()
