@@ -47,13 +47,13 @@
     stream-browserify "^3.0.0"
     util "^0.12.4"
 
-"@connext/nxtp-txservice@2.3.0-alpha.1":
-  version "2.3.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@connext/nxtp-txservice/-/nxtp-txservice-2.3.0-alpha.1.tgz#26dc385856211c090f80d3f3205a0503fdf881c1"
-  integrity sha512-8LzTBNW49NYAeOCxG17Agz1Fei0d933vO88HAH6jsS27fDVysobGY6LMWD4hbzrMXAvaMHiA/kLFRr5WP54KLQ==
+"@connext/nxtp-txservice@2.3.0-alpha.5":
+  version "2.3.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@connext/nxtp-txservice/-/nxtp-txservice-2.3.0-alpha.5.tgz#67468c87b49f1304255aff3b3a92fb080281538c"
+  integrity sha512-CbEwlFnq5rf1DzB27igxnqKtseu4pUNfelPjZEsel0j3GHgABd7Up0dCPNyKyHDUIUQ3HeVcjmpakYUL/rgmxQ==
   dependencies:
-    "@connext/nxtp-utils" "2.3.0-alpha.0"
-    "@connext/smart-contracts" "2.3.0-alpha.1"
+    "@connext/nxtp-utils" "2.3.0-alpha.5"
+    "@connext/smart-contracts" "2.3.0-alpha.5"
     "@sinclair/typebox" "0.25.21"
     ajv "8.12.0"
     ajv-formats "2.1.1"
@@ -62,10 +62,10 @@
     interval-promise "1.4.0"
     p-queue "6.6.2"
 
-"@connext/nxtp-utils@2.3.0-alpha.0":
-  version "2.3.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@connext/nxtp-utils/-/nxtp-utils-2.3.0-alpha.0.tgz#e4433e6ec5060664222d120f540581abce0dee8e"
-  integrity sha512-pTaEX2jX6EG3uXsE0ltFrT5gcSTzHcNzaahwB43sBfR6msEDTQXS5pB9bL4LtzFqE/nPLZeI5X46Q3SWIUg/bA==
+"@connext/nxtp-utils@2.3.0-alpha.5":
+  version "2.3.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@connext/nxtp-utils/-/nxtp-utils-2.3.0-alpha.5.tgz#5cf9306e33204a4aee1e68314882142eb33dc347"
+  integrity sha512-4psx5RFaZctXeCxes4YUXswFUZTPhYC/Vs+OuaZvllg6cm4Q/wbEbQDBqgNI+IUC7g9YqbvRW+wO60LiFVLRFA==
   dependencies:
     "@maticnetwork/maticjs" "3.6.6"
     "@maticnetwork/maticjs-web3" "1.0.4"
@@ -84,25 +84,25 @@
     secp256k1 "4.0.3"
     sinon-chai "3.7.0"
 
-"@connext/sdk-core@2.3.0-alpha.1":
-  version "2.3.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.3.0-alpha.1.tgz#48bc8533cdd6c7b94425003713ccf4a5beba2da1"
-  integrity sha512-bxYnWoESmAxvV3G+vUJrfpAO4XVyz9G6GMtVW4nLICj5Yp0S1bhsdodMPldUJ9leGLCTTqyac6UhJHgWiCEY3Q==
+"@connext/sdk-core@2.3.0-alpha.5":
+  version "2.3.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@connext/sdk-core/-/sdk-core-2.3.0-alpha.5.tgz#c4b559da4819e7910dcdc5ca90ee4efcbd08cd78"
+  integrity sha512-w454JyOHVzouIx7hmTTi6OZ/7NL+63exhse/dAgtMDqDCyCOsYVHhzHvPSck+bkN8VO96ts8BdBVw1JMAz79uQ==
   dependencies:
-    "@connext/nxtp-txservice" "2.3.0-alpha.1"
-    "@connext/nxtp-utils" "2.3.0-alpha.0"
+    "@connext/nxtp-txservice" "2.3.0-alpha.5"
+    "@connext/nxtp-utils" "2.3.0-alpha.5"
     "@sinclair/typebox" "0.25.21"
     ethers "5.7.2"
     isomorphic-fetch "3.0.0"
     memoizee "0.4.15"
     typedoc "0.23.25"
 
-"@connext/smart-contracts@2.3.0-alpha.1":
-  version "2.3.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@connext/smart-contracts/-/smart-contracts-2.3.0-alpha.1.tgz#9b001722d0444a935893484f6413c7804b8b4bd1"
-  integrity sha512-6PpWUo1BxU7TUzMIOHomJaMQzpYC+3M9aWOU9FXxrINCqLssI4FLi2+NJ24dzSTvAZFxHKgD7505RyDB3ox9Ew==
+"@connext/smart-contracts@2.3.0-alpha.5":
+  version "2.3.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@connext/smart-contracts/-/smart-contracts-2.3.0-alpha.5.tgz#81a04e110137c75c1fa730fd25094b3bba230dcf"
+  integrity sha512-lkGQNgNUcMoo2SPoVZOlvQ/TjB1Z+olqzGlIAXqbJg+lHA6IZXzp4ZVJ4pqCDx8y/hyUOh+x2WiEtxLMJkockQ==
   dependencies:
-    "@eth-optimism/sdk" "2.1.0"
+    "@eth-optimism/sdk" "3.2.0"
 
 "@csstools/cascade-layer-name-parser@^1.0.5", "@csstools/cascade-layer-name-parser@^1.0.7":
   version "1.0.7"
@@ -396,15 +396,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/unitless/-/unitless-0.8.0.tgz#a4a36e9cbdc6903737cd20d38033241e1b8833db"
   integrity sha512-VINS5vEYAscRl2ZUDiT3uMPlrFQupiKgHz5AA4bCH1miKBg4qtwkim1qPmJj/4WG6TreYMY111rEFsjupcOKHw==
 
-"@eth-optimism/contracts-bedrock@0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/contracts-bedrock/-/contracts-bedrock-0.14.0.tgz#f93006416c8b114fb78d2e477dccd525aa651458"
-  integrity sha512-mvbSE2q2cyHUwg1jtHwR4JOQJcwdCVRAkmBdXCKUP0XsP48NT1J92bYileRdiUM5nLIESgNNmPA8L2J87mr62g==
-  dependencies:
-    "@eth-optimism/core-utils" "^0.12.0"
-    "@openzeppelin/contracts" "4.7.3"
-    "@openzeppelin/contracts-upgradeable" "4.7.3"
-    ethers "^5.7.0"
+"@eth-optimism/contracts-bedrock@0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/contracts-bedrock/-/contracts-bedrock-0.17.1.tgz#729b1dc53ec23d02ea9e68181f994955129f7415"
+  integrity sha512-Hc5peN5PM8kzl9dzqSD5jv6ED3QliO1DF0dXLRJxfrXR7/rmEeyuAYESUwUM0gdJZjkwRYiS5m230BI6bQmnlw==
 
 "@eth-optimism/contracts@0.6.0":
   version "0.6.0"
@@ -437,10 +432,10 @@
     bufio "^1.0.7"
     chai "^4.3.4"
 
-"@eth-optimism/core-utils@^0.12.0":
-  version "0.12.3"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/core-utils/-/core-utils-0.12.3.tgz#7799292ee2155d6f5dd67e2ee58e4a1fbcfd87d4"
-  integrity sha512-NzHai4HCWbHbnuu4HJaDhT8aGGZXyrKqgteHGhOPKGHRl3DTuuisD/baFq1XVck6X0iHjDihQOLuygtxkdL19A==
+"@eth-optimism/core-utils@0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/core-utils/-/core-utils-0.13.1.tgz#f15ec207a629c9bbf1a10425c1b4a4c0be544755"
+  integrity sha512-1FvzbUmCEy9zSKPG1QWg2VfA2Cy90xBA9Wkp11lXXrz91zUPCNCNSRTujXWYIC86ketNsZp7p4njSf6lTycHCw==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/abstract-provider" "^5.7.0"
@@ -453,21 +448,22 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/rlp" "^5.7.0"
     "@ethersproject/web" "^5.7.1"
-    chai "^4.3.7"
+    chai "^4.3.9"
     ethers "^5.7.2"
     node-fetch "^2.6.7"
 
-"@eth-optimism/sdk@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-2.1.0.tgz#8c679ddcf84144415746b73ed6e4eaaf07fb6350"
-  integrity sha512-XfRMsPNZRzdlNGARx3UIX88xaCBTJRzsZuKrRz2j8aqYkTpDOvdz87zYsmj+6Nl2tdOlgcxlhZPFCqdRtbiCaQ==
+"@eth-optimism/sdk@3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-3.2.0.tgz#2e2f209c33443b8700f5b96795e23f7ddd8fc14f"
+  integrity sha512-+ZEO/mDWz3WLzaPVHvgOAK4iN723HmI6sLLr2tmO1/RUoCHVfWMUDwuiikrA49cAsdsjMxCV9+0XNZ8btD2JUg==
   dependencies:
     "@eth-optimism/contracts" "0.6.0"
-    "@eth-optimism/contracts-bedrock" "0.14.0"
-    "@eth-optimism/core-utils" "0.12.0"
+    "@eth-optimism/contracts-bedrock" "0.17.1"
+    "@eth-optimism/core-utils" "0.13.1"
     lodash "^4.17.21"
-    merkletreejs "^0.2.27"
+    merkletreejs "^0.3.11"
     rlp "^2.2.7"
+    semver "^7.5.4"
 
 "@ethereumjs/block@^3.6.2":
   version "3.6.3"
@@ -1177,16 +1173,6 @@
   dependencies:
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
-
-"@openzeppelin/contracts-upgradeable@4.7.3":
-  version "4.7.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.7.3.tgz#f1d606e2827d409053f3e908ba4eb8adb1dd6995"
-  integrity sha512-+wuegAMaLcZnLCJIvrVUDzA9z/Wp93f0Dla/4jJvIhijRrPabjQbZe6fWiECLaJyfn5ci9fqf9vTw3xpQOad2A==
-
-"@openzeppelin/contracts@4.7.3":
-  version "4.7.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.3.tgz#939534757a81f8d69cc854c7692805684ff3111e"
-  integrity sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw==
 
 "@parcel/watcher-android-arm64@2.4.0":
   version "2.4.0"
@@ -2982,7 +2968,7 @@ chai@4.3.7:
     pathval "^1.1.1"
     type-detect "^4.0.5"
 
-chai@^4.3.4, chai@^4.3.7:
+chai@^4.3.4, chai@^4.3.9:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.4.1.tgz#3603fa6eba35425b0f2ac91a009fe924106e50d1"
   integrity sha512-13sOfMv2+DWduEU+/xbun3LScLoqN17nBeTLUsmDfKdoiC1fr0n9PU4guu4AhRcOVFk/sW8LyZWHuhWtQZiF+g==
@@ -3320,6 +3306,11 @@ crypto-js@^3.1.9-1:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.3.0.tgz#846dd1cce2f68aacfa156c8578f926a609b7976b"
   integrity sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==
+
+crypto-js@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
+  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
 
 css-blank-pseudo@^6.0.0:
   version "6.0.1"
@@ -3994,7 +3985,7 @@ ethereumjs-util@^7.1.4, ethereumjs-util@^7.1.5:
     ethereum-cryptography "^0.1.3"
     rlp "^2.2.4"
 
-ethers@5.7.2, ethers@^5.3.1, ethers@^5.7.0, ethers@^5.7.2:
+ethers@5.7.2, ethers@^5.3.1, ethers@^5.7.2:
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
@@ -5413,14 +5404,14 @@ merkletreejs@0.3.9:
     treeify "^1.1.0"
     web3-utils "^1.3.4"
 
-merkletreejs@^0.2.27:
-  version "0.2.32"
-  resolved "https://registry.yarnpkg.com/merkletreejs/-/merkletreejs-0.2.32.tgz#cf1c0760e2904e4a1cc269108d6009459fd06223"
-  integrity sha512-TostQBiwYRIwSE5++jGmacu3ODcKAgqb0Y/pnIohXS7sWxh1gCkSptbmF1a43faehRDpcHf7J/kv0Ml2D/zblQ==
+merkletreejs@^0.3.11:
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/merkletreejs/-/merkletreejs-0.3.11.tgz#e0de05c3ca1fd368de05a12cb8efb954ef6fc04f"
+  integrity sha512-LJKTl4iVNTndhL+3Uz/tfkjD0klIWsHlUzgtuNnNrsf7bAlXR30m+xYB7lHr5Z/l6e/yAIsr26Dabx6Buo4VGQ==
   dependencies:
     bignumber.js "^9.0.1"
     buffer-reverse "^1.0.1"
-    crypto-js "^3.1.9-1"
+    crypto-js "^4.2.0"
     treeify "^1.1.0"
     web3-utils "^1.3.4"
 
@@ -7073,7 +7064,7 @@ semaphore-async-await@^1.5.1:
   resolved "https://registry.yarnpkg.com/semaphore-async-await/-/semaphore-async-await-1.5.1.tgz#857bef5e3644601ca4b9570b87e9df5ca12974fa"
   integrity sha512-b/ptP11hETwYWpeilHXXQiV5UJNJl7ZWWooKRE5eBIYWoom6dZ0SluCIdCtKycsMtZgKWE01/qAw6jblw1YVhg==
 
-semver@^7.3.8:
+semver@^7.3.8, semver@^7.5.4:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
   integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==

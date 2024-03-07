@@ -1548,10 +1548,9 @@ export default () => {
                             </span> :
                             (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ? 
                             <div className="flex flex-wrap items-center justify-center space-x-1">
-                              <span>{`Your funds are on the way! \n Funds are taking our
-                              slow path as our router intent network could not
-                              boost your transfer. We estimate completion in
-                              less than 5 hours. Thank you for your patience.`}</span>
+                              <span>{`On the way! Estimated time: 3-6 hours \n 💡 There was
+                              insufficient intent-layer liquidity to boost this transfer, so
+                              it is taking a slow path. Funds are safe.`}</span>
                             </div>
                             : 
                             <div className="flex flex-wrap items-center justify-center space-x-1">
@@ -1564,9 +1563,6 @@ export default () => {
                               />.
                             </div>
                           }
-                          <span className="text-center">
-                            💡 Connext plugs into the chain native bridges for optimal security and trust minimization. No oracles or external validator sets are used.
-                          </span>
                         </div>
                     }
                   </span>
