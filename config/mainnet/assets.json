@@ -514,6 +514,43 @@
     "preset": true
   },
   {
+    "id": "ezeth",
+    "symbol": "ezETH",
+    "name": "Renzo Restaked ETH",
+    "image": "/logos/assets/ezeth.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "ezETH",
+        "xERC20": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        "lockbox": "0xC8140dA31E6bCa19b287cC35531c2212763C2059",
+        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
+      },
+      {
+        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "ezETH"
+      },
+      {
+        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "ezETH"
+      },
+      {
+        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        "chain_id": 34443,
+        "decimals": 18,
+        "symbol": "ezETH"
+      }
+    ],
+    "preset": true
+  },
+  {
     "id": "radar",
     "symbol": "RADAR",
     "name": "DappRadar",
@@ -1074,43 +1111,6 @@
       }
     ],
     "color": "#2675c8",
-    "preset": true
-  },
-  {
-    "id": "ezeth",
-    "symbol": "ezETH",
-    "name": "Renzo Restaked ETH",
-    "image": "/logos/assets/ezeth.png",
-    "is_xERC20": true,
-    "contracts": [
-      {
-        "contract_address": "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "ezETH",
-        "xERC20": "0x2416092f143378750bb29b79eD961ab195CcEea5",
-        "lockbox": "0xC8140dA31E6bCa19b287cC35531c2212763C2059",
-        "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68"
-      },
-      {
-        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
-        "chain_id": 42161,
-        "decimals": 18,
-        "symbol": "ezETH"
-      },
-      {
-        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
-        "chain_id": 56,
-        "decimals": 18,
-        "symbol": "ezETH"
-      },
-      {
-        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
-        "chain_id": 34443,
-        "decimals": 18,
-        "symbol": "ezETH"
-      }
-    ],
     "preset": true
   }
 ]
