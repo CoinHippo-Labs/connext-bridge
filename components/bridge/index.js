@@ -125,7 +125,7 @@ export default () => {
           const paths = split(path.replace('/', ''), 'normal', '-')
           const sourceChain = paths[paths.indexOf('from') + 1]
           let destinationChain = paths[paths.indexOf('to') + 1]
-          const asset = _.head(paths) !== 'from' ? _.head(paths) : NETWORK === 'testnet' ? [sourceChain, destinationChain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
+          const asset = _.head(paths) !== 'from' ? _.head(paths) : NETWORK === 'testnet' ? [sourceChain, destinationChain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'eth'
           const source_chain_data = getChainData(sourceChain, chains_data)
           const destination_chain_data = getChainData(destinationChain, chains_data)
           const asset_data = getAssetData(asset, assets_data)
