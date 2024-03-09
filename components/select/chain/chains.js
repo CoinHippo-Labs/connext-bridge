@@ -36,7 +36,7 @@ export default (
       return { ...d, max_score: _.max(scores) }
     })
     .filter(d => d.max_score > 1 / 10),
-    ['group', 'max_score'], ['desc', 'desc'],
+    ['group', 'max_score'], ['asc', 'desc'],
   )
 
   return (
