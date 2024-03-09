@@ -97,6 +97,37 @@
     "unwrapper_contract": "0x429b9eb01362b2799131EfCC44319689b662999D"
   },
   {
+    "id": "mode",
+    "chain_id": 34443,
+    "domain_id": "1836016741",
+    "name": "Mode",
+    "short_name": "MODE",
+    "rpcs": [
+      "https://1rpc.io/mode",
+      "https://mainnet.mode.network"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Mode",
+      "url": "https://explorer.mode.network/",
+      "icon": "/logos/explorers/mode.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mode.png",
+    "color": "#00DACC",
+    "unwrapper_contract": "0x2c8DA9c3166085acebc70Ad9491cA2bfa10C8b9F",
+    "coingecko_id": "mode",
+    "gas_coingecko_id": "ethereum"
+  },
+  {
     "id": "polygon",
     "chain_id": 137,
     "domain_id": "1886350457",
@@ -285,34 +316,6 @@
     "unwrapper_contract": "0xd0646a7F776330f5DEf68b2ed088663d8c9d921A",
     "group": "evm",
     "coingecko_id": "base",
-    "gas_coingecko_id": "ethereum"
-  },
-  {
-    "id": "mode",
-    "chain_id": 34443,
-    "domain_id": "1836016741",
-    "name": "Mode",
-    "short_name": "MODE",
-    "rpcs": ["https://1rpc.io/mode", "https://mainnet.mode.network"],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Mode",
-      "url": "https://explorer.mode.network/",
-      "icon": "/logos/explorers/mode.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mode.png",
-    "color": "#00DACC",
-    "unwrapper_contract": "0x2c8DA9c3166085acebc70Ad9491cA2bfa10C8b9F",
-    "coingecko_id": "mode",
     "gas_coingecko_id": "ethereum"
   }
 ]
