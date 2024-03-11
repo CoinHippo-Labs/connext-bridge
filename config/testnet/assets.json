@@ -511,5 +511,27 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "ezeth",
+    "symbol": "ezETH",
+    "name": "Test Renzo Restaked ETH",
+    "image": "/logos/assets/ezeth.png",
+    "is_blast": true,
+    "contracts": [
+      {
+        "contract_address": "0x4f1d0480B987d9AEA11EbaAa31474d07B228769A",
+        "chain_id": 11155111,
+        "decimals": 18,
+        "symbol": "ezETH Test"
+      },
+      {
+        "contract_address": "0x4200000000000000000000000000000000000010",
+        "chain_id": 168587773,
+        "decimals": 18,
+        "symbol": "ezETH Test"
+      }
+    ],
+    "preset": true
   }
 ]

@@ -38,6 +38,9 @@ import { getChainData, getAssetData, getContractData, getBalanceData } from '../
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
+import optimismSDK from '@eth-optimism/sdk'
+import { getProvider } from '../../lib/chain/evm'
+
 
 const DEFAULT_OPTIONS = {
   to: '',
@@ -766,6 +769,9 @@ export default () => {
 
     let success = false
     let failed = false
+
+    let gasForOp = '0'
+
     if (sdk) {
       const { source_chain, destination_chain, asset, amount, receive_wrap } = { ...bridge }
       let { symbol } = { ...bridge }
@@ -815,6 +821,45 @@ export default () => {
       const relayerFeeDecimals = relayerFeeAssetType === 'transacting' ? sourceDecimals : 18
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
+
+
+      if(source_asset_data?.is_blast){
+        const l1SignerOrProvider = getProvider(source_chain, chains_data)
+        const l2SignerOrProvider = getProvider(destination_chain, chains_data)
+        const crossChainMessenger = new optimismSDK.CrossChainMessenger({
+          l1ChainId: source_chain,
+          l2ChainId: destination_chain,
+          l1SignerOrProvider: l1SignerOrProvider,
+          l2SignerOrProvider: l2SignerOrProvider
+        })
+        const gas = await crossChainMessenger.estimateGas({
+          l1Token: source_contract_data?.contract_address,
+          l2Token: destination_contract_data?.contract_address,
+          amount:parseUnits(_amount, sourceDecimals),
+        })
+        gasForOp = gas
+        console.log("gas fromheyhey", gas) 
+        if(source_chain === 11155111) // checks if chain is sepolia
+        {
+          const depositTx1 = await crossChainMessenger.approveERC20(source_contract_data?.contract_address, destination_contract_data?.contract_address, 1e18)
+          await depositTx1.wait()
+          const depositTx2 = await crossChainMessenger.depositERC20(l1Contract.address, l2Addr, 1e9)
+          await depositTx2.wait()
+          await crossChainMessenger.waitForMessageStatus(depositTx2.hash, optimismSDK.MessageStatus.RELAYED)
+          console.log("we are returning from here")
+          return
+        }else {
+          const withdrawalTx1 = await crossChainMessenger.withdrawERC20(l1Contract.address, l2Addr, 1e9)
+          await withdrawalTx1.wait()
+          await crossChainMessenger.waitForMessageStatus(withdrawalTx1.hash, optimismSDK.MessageStatus.READY_TO_PROVE)
+          const withdrawalTx2 = await crossChainMessenger.proveMessage(withdrawalTx1.hash)
+          await withdrawalTx2.wait()
+          await crossChainMessenger.waitForMessageStatus(withdrawalTx1.hash, optimismSDK.MessageStatus.READY_FOR_RELAY)
+          withdrawalTx3 = await crossChainMessenger.finalizeMessage(withdrawalTx1.hash)
+          await withdrawalTx3.wait() 
+          return
+        }
+      }
 
       const xcallParams = {
         origin: source_domain,
@@ -2184,7 +2229,7 @@ export default () => {
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
                                       {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
-                                          {'<2 hours'}
+                                          {'<5 hours'}
                                         </span> :
                                         <span className="text-green-600 dark:text-green-500">
                                           {'<4 minutes'}

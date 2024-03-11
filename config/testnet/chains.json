@@ -30,6 +30,64 @@
     "no_pool": true
   },
   {
+    "id": "sepolia",
+    "chain_id": 11155111,
+    "domain_id": "1735353714",
+    "name": "Sepolia",
+    "short_name": "Sepolia",
+    "rpcs": [
+      "https://ethereum-sepolia-rpc.publicnode.com",
+      "https://eth-sepolia.public.blastapi.io"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Etherscan",
+      "url": "https://sepolia.etherscan.io/",
+      "icon": "/logos/explorers/etherscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/goerli.png",
+    "color": "#636890",
+    "no_pool": true
+  },
+  {
+    "id": "blast sepolia",
+    "chain_id": 11155111,
+    "domain_id": "1735353714",
+    "name": "Blast Sepolia Testnet",
+    "short_name": "Blast Sepolia",
+    "rpcs": [
+      "https://sepolia.blast.io",
+      "https://eth-sepolia.public.blastapi.io"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Etherscan",
+      "url": "https://testnet.blastscan.io/",
+      "icon": "/logos/explorers/etherscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/goerli.png",
+    "color": "#636890",
+    "no_pool": true
+  },
+  {
     "id": "polygon",
     "chain_id": 80001,
     "domain_id": "9991",
@@ -93,9 +151,7 @@
     "domain_id": "1668247156",
     "name": "Linea",
     "short_name": "LINEA",
-    "rpcs": [
-      "https://rpc.goerli.linea.build"
-    ],
+    "rpcs": ["https://rpc.goerli.linea.build"],
     "native_token": {
       "name": "Ethereum",
       "symbol": "ETH",
@@ -181,10 +237,7 @@
     "domain_id": "2016506996",
     "name": "X1",
     "short_name": "X1",
-    "rpcs": [
-      "https://testrpc.x1.tech",
-      "https://x1testrpc.okx.com"
-    ],
+    "rpcs": ["https://testrpc.x1.tech", "https://x1testrpc.okx.com"],
     "native_token": {
       "name": "OKB",
       "symbol": "OKB",
