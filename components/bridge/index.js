@@ -869,7 +869,7 @@ export default () => {
             const approveLockboxTx = await tokenContract.approve(source_contract_data?.lockbox, _amount)
             setApproveResponse({
               status: 'pending',
-              message: `Preparing ${symbol} for sendoff`,
+              message: `Preparing ${symbol} for transfer`,
               tx_hash: approveLockboxTx.hash,
             })
             setApproveProcessing(true)
@@ -882,7 +882,7 @@ export default () => {
           }
           setCallResponse({
             status: 'pending',
-            message: `Preparing ${symbol} for sendoff`
+            message: `Preparing ${symbol} for transfer`
           })
 
           const depositTx = await lockbox.deposit(_amount)
@@ -895,6 +895,7 @@ export default () => {
           // Bridge xERC20
           if (readableAllowance < amount) {
             const approveTx = await xERC20Contract.approve(bridgeAddress, _amount)
+            setCallResponse(null)
             setApproveResponse({
               status: 'pending',
               message: `Approving ${symbol} to Blast Bridge`,
@@ -2387,6 +2388,12 @@ export default () => {
                           Route not supported
                         </div>
                       )
+                    }
+                    {
+                      (destination_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 81457) &&
+                      <div className="text-black bg-orange-200 border-l-4 border-orange-500 p-4 3xl:text-2xl font-semibold text-center">
+                        This transfer will be sent through the Blast Canonical Bridge. Withdrawals will be subject to the 14 day waiting period and must be performed manually.
+                      </div>
                     }
                     {provider && supported && (wrong_chain || isNumber(amount)) && (xcallData || isNumber(sourceAmount)) ?
                       wrong_chain ?
