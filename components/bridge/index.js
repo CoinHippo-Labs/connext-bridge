@@ -38,7 +38,7 @@ import { getChainData, getAssetData, getContractData, getBalanceData } from '../
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
-import optimismSDK from '@eth-optimism/sdk'
+import * as optimismSDK from '@eth-optimism/sdk'
 import { getProvider } from '../../lib/chain/evm'
 
 
@@ -691,7 +691,11 @@ export default () => {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? original_source_contract_data : source_contract_data)?.contract_address
-
+      console.log(source_chain_data?.chain_id, destination_chain_data?.chain_id , "into the calculate amount recieved blast")
+      if(source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773) {
+        setEstimatedValues({amountReceived: _amount, routerFee: '0', slippage: 0})
+        return _amount
+      }
       const { contract_address, next_asset } = { ...original_destination_contract_data }
       let destinationTokenAddress = contract_address
       const isNextAsset = typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, next_asset?.contract_address)
@@ -822,43 +826,72 @@ export default () => {
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
 
-
+      let BlastBridgeETH = '0x3a05E5d33d7Ab3864D53aaEc93c8301C1Fa49115';
       if(source_asset_data?.is_blast){
-        const l1SignerOrProvider = getProvider(source_chain, chains_data)
-        const l2SignerOrProvider = getProvider(destination_chain, chains_data)
-        const crossChainMessenger = new optimismSDK.CrossChainMessenger({
-          l1ChainId: source_chain,
-          l2ChainId: destination_chain,
-          l1SignerOrProvider: l1SignerOrProvider,
-          l2SignerOrProvider: l2SignerOrProvider
-        })
-        const gas = await crossChainMessenger.estimateGas({
-          l1Token: source_contract_data?.contract_address,
-          l2Token: destination_contract_data?.contract_address,
-          amount:parseUnits(_amount, sourceDecimals),
-        })
-        gasForOp = gas
-        console.log("gas fromheyhey", gas) 
-        if(source_chain === 11155111) // checks if chain is sepolia
-        {
-          const depositTx1 = await crossChainMessenger.approveERC20(source_contract_data?.contract_address, destination_contract_data?.contract_address, 1e18)
-          await depositTx1.wait()
-          const depositTx2 = await crossChainMessenger.depositERC20(l1Contract.address, l2Addr, 1e9)
-          await depositTx2.wait()
-          await crossChainMessenger.waitForMessageStatus(depositTx2.hash, optimismSDK.MessageStatus.RELAYED)
-          console.log("we are returning from here")
-          return
-        }else {
-          const withdrawalTx1 = await crossChainMessenger.withdrawERC20(l1Contract.address, l2Addr, 1e9)
-          await withdrawalTx1.wait()
-          await crossChainMessenger.waitForMessageStatus(withdrawalTx1.hash, optimismSDK.MessageStatus.READY_TO_PROVE)
-          const withdrawalTx2 = await crossChainMessenger.proveMessage(withdrawalTx1.hash)
-          await withdrawalTx2.wait()
-          await crossChainMessenger.waitForMessageStatus(withdrawalTx1.hash, optimismSDK.MessageStatus.READY_FOR_RELAY)
-          withdrawalTx3 = await crossChainMessenger.finalizeMessage(withdrawalTx1.hash)
-          await withdrawalTx3.wait() 
-          return
+        if(NETWORK === 'testnet'){
+          BlastBridgeETH = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f';
         }
+
+        const bridgecontractABI = [
+          'function bridgeERC20(address _localToken, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)'
+        ];
+        const approveABI = [
+          'function approve(address spender, uint256 amount)',
+          'function allowance(address owner, address spender) external view returns (uint256)'
+        ];
+
+
+        const _localToken = source_contract_data?.contract_address;
+        const _remoteToken = destination_contract_data?.contract_address;
+        const _amount = parseUnits(amount, sourceDecimals)
+        const _minGasLimit = 500000; 
+        const _extraData = '0x';
+
+
+        const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
+        const allowance = await tokenContract.allowance(address, BlastBridgeETH)
+        const readableAllowance = utils.formatUnits(allowance, sourceDecimals);
+       
+        if((readableAllowance) < (amount)) {
+          const approveTX = await tokenContract.approve(BlastBridgeETH, _amount);
+          setApproveResponse({
+            status: 'pending',
+            message: `Waiting for ${symbol} approval`,
+            tx_hash: approveTX.hash,
+          })
+          setApproveProcessing(true)
+
+
+          const appReciept = await approveTX.wait()
+          const { status } = { ...appReciept }
+          failed = !status
+
+          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
+          setApproveProcessing(false)
+        }
+        setApproving(false)
+       
+        const contract = new Contract(BlastBridgeETH, bridgecontractABI, signer);
+        setCallResponse({
+          status: 'pending',
+          message: `Please send the bridge transaction`,
+        })
+
+        const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData);
+        console.log('Transaction sent! Hash:', tx.hash);
+        setCallProcessing(true)
+        setCallResponse(null)
+
+        const receipt = await tx.wait()
+        const { status } = { ...receipt }
+        failed = !status
+        setXcallData(receipt)
+        setCallResponse({
+          status: failed ? 'failed' : 'success',
+          message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
+          tx_hash: tx.hash,
+        })
+        return
       }
 
       const xcallParams = {
@@ -888,7 +921,6 @@ export default () => {
       // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
       if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
         let amountToApprove
-        console.log(source_contract_data, "prathmesh")
         try {
           amountToApprove = parseUnits(amount, sourceDecimals)
           console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
