@@ -2389,6 +2389,12 @@ export default () => {
                         </div>
                       )
                     }
+                    {
+                      (destination_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 81457) &&
+                      <div className="text-orange-600 bg-orange-100 dark:bg-orange-200 dark:text-orange-800 border-l-4 border-orange-500 p-4 3xl:text-2xl font-semibold text-center">
+                        This transfer will be sent through the Blast Canonical Bridge. Withdrawals will be subject to the 14 day waiting period and must be performed manually.
+                      </div>
+                    }
                     {provider && supported && (wrong_chain || isNumber(amount)) && (xcallData || isNumber(sourceAmount)) ?
                       wrong_chain ?
                         <Wallet
