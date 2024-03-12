@@ -2474,7 +2474,6 @@ export default () => {
                                     </div>
                                   )}
                                   closeDisabled={true}
-                                  href={blastscan.io} _target="_blank"
                                 >
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between space-x-2">
