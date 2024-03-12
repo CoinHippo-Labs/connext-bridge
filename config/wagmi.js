@@ -27,6 +27,50 @@ export const mode = defineChain({
   testnet: false
 })
 
+export const blastSepolia = defineChain({
+  id: 168587773,
+  name:'Blast Sepolia Testnet',
+  network:'blast',
+  nativeCurrency: { name:"Ether", symbol:'ETH', decimals:18 },
+  rpcUrls: {
+    default: {
+      http:['https://sepolia.blast.io']
+    },
+    public: {
+      http: ['https://blast-sepolia.blockpi.network/v1/rpc/public']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blast Sepolia Explorer",
+      url: 'https://testnet.blastscan.io/'
+    }
+  },
+  testnet: true
+})
+
+export const blast = defineChain({
+  id: 81457,
+  name:'Blast',
+  network:'blast',
+  nativeCurrency: { name:"Ether", symbol:'ETH', decimals:18 },
+  rpcUrls: {
+    default: {
+      http:['https://blast.gasswap.org']
+    },
+    public: {
+      http: ['https://rpc.blast.io']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blast Explorer",
+      url: 'https://blastscan.io/'
+    }
+  },
+  testnet: true
+})
+
 export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
   [
     { _id: 'ethereum', ...mainnet },
@@ -60,7 +104,8 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ?
     { _id: 'x1', id: 195, network: 'x1', name: 'X1', nativeCurrency: { name: 'OKB', symbol: 'OKB', decimals: 18 }, rpcUrls: { default: { http: ['https://x1testrpc.okx.com'] }, public: { http: ['https://x1testrpc.okx.com'] }, infura: { http: ['https://x1testrpc.okx.com'] } }, blockExplorers: { default: { name: 'X1', url: 'https://www.oklink.com/x1-test' } } },
     { _id: 'metis', ...metisGoerli },
     { _id: 'modeTestnet', ...modeTestnet},
-    {_id:"sepolia", ...sepolia}
+    { _id: "sepolia", ...sepolia},
+    { _id: "blastSepolia", ...blastSepolia}
   ]
 
 export const queryClient = new QueryClient()

@@ -38,8 +38,6 @@ import { getChainData, getAssetData, getContractData, getBalanceData } from '../
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
-import * as optimismSDK from '@eth-optimism/sdk'
-import { getProvider } from '../../lib/chain/evm'
 
 
 const DEFAULT_OPTIONS = {
@@ -826,12 +824,14 @@ export default () => {
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
 
-      let BlastBridgeETH = '0x3a05E5d33d7Ab3864D53aaEc93c8301C1Fa49115';
+      let bridgeAddressETH = '0x3a05E5d33d7Ab3864D53aaEc93c8301C1Fa49115';
+      let brideAddressBlast = '0x4200000000000000000000000000000000000010'
+
       if(source_asset_data?.is_blast){
         if(NETWORK === 'testnet'){
-          BlastBridgeETH = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f';
+          bridgeAddressETH = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f';
+          brideAddressBlast = '0x4200000000000000000000000000000000000010';
         }
-
         const bridgecontractABI = [
           'function bridgeERC20(address _localToken, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)'
         ];
@@ -839,58 +839,118 @@ export default () => {
           'function approve(address spender, uint256 amount)',
           'function allowance(address owner, address spender) external view returns (uint256)'
         ];
+        const withdrawABI = [
+          'function withdraw(address _l2Token,uint256 _amount,uint32 _minGasLimit,bytes calldata _extraData)' 
+        ]
 
-
-        const _localToken = source_contract_data?.contract_address;
-        const _remoteToken = destination_contract_data?.contract_address;
-        const _amount = parseUnits(amount, sourceDecimals)
-        const _minGasLimit = 500000; 
-        const _extraData = '0x';
-
-
-        const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
-        const allowance = await tokenContract.allowance(address, BlastBridgeETH)
-        const readableAllowance = utils.formatUnits(allowance, sourceDecimals);
-       
-        if((readableAllowance) < (amount)) {
-          const approveTX = await tokenContract.approve(BlastBridgeETH, _amount);
-          setApproveResponse({
+        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? bridgeAddressETH : brideAddressBlast
+        if(source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111) {
+        
+  
+  
+          const _localToken = source_contract_data?.contract_address;
+          const _remoteToken = destination_contract_data?.contract_address;
+          const _amount = parseUnits(amount, sourceDecimals)
+          const _minGasLimit = 500000; 
+          const _extraData = '0x';
+  
+  
+          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
+          const allowance = await tokenContract.allowance(address, bridgeAddress)
+          const readableAllowance = utils.formatUnits(allowance, sourceDecimals);
+         
+          if((readableAllowance) < (amount)) {
+            const approveTX = await tokenContract.approve(bridgeAddress, _amount);
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${symbol} approval`,
+              tx_hash: approveTX.hash,
+            })
+            setApproveProcessing(true)
+  
+  
+            const appReciept = await approveTX.wait()
+            const { status } = { ...appReciept }
+            failed = !status
+  
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
+            setApproveProcessing(false)
+          }
+          setApproving(false)
+         
+          const contract = new Contract(bridgeAddress, bridgecontractABI, signer);
+          setCallResponse({
             status: 'pending',
-            message: `Waiting for ${symbol} approval`,
-            tx_hash: approveTX.hash,
+            message: `Please send the bridge transaction`,
           })
-          setApproveProcessing(true)
-
-
-          const appReciept = await approveTX.wait()
-          const { status } = { ...appReciept }
+  
+          const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData);
+          console.log('Transaction sent! Hash:', tx.hash);
+          setCallProcessing(true)
+          setCallResponse(null)
+  
+          const receipt = await tx.wait()
+          const { status } = { ...receipt }
           failed = !status
+          setXcallData(receipt)
+          setCallResponse({
+            status: failed ? 'failed' : 'success',
+            message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
+            tx_hash: tx.hash,
+          })
+        }else{
+          // bridging from blast -> Withdrwal flow
+          
 
-          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
-          setApproveProcessing(false)
+          const _l2Token = source_contract_data?.contract_address;
+          const _amount = parseUnits(amount, sourceDecimals)
+          const _minGasLimit = 400000
+          const _extraData = '0x';
+
+          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
+          const allowance = await tokenContract.allowance(address, bridgeAddress)
+          const readableAllowance = utils.formatUnits(allowance, sourceDecimals);
+         
+          if((readableAllowance) < (amount)) {
+            const approveTX = await tokenContract.approve(bridgeAddress, _amount);
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${symbol} approval`,
+              tx_hash: approveTX.hash,
+            })
+            setApproveProcessing(true)
+  
+  
+            const appReciept = await approveTX.wait()
+            const { status } = { ...appReciept }
+            failed = !status
+  
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
+            setApproveProcessing(false)
+          }
+          setApproving(false)
+
+          const contract = new Contract(bridgeAddress, withdrawABI, signer);
+          setCallResponse({
+            status: 'pending',
+            message: `Please send the bridge transaction`,
+          })
+  
+          const tx = await contract.withdraw(_l2Token, _amount, _minGasLimit, _extraData);
+          console.log('Transaction sent! Hash:', tx.hash);
+          setCallProcessing(true)
+          setCallResponse(null)
+  
+          const receipt = await tx.wait()
+          const { status } = { ...receipt }
+          failed = !status
+          setXcallData(receipt)
+          setCallResponse({
+            status: failed ? 'failed' : 'success',
+            message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
+            tx_hash: tx.hash,
+          })
         }
-        setApproving(false)
-       
-        const contract = new Contract(BlastBridgeETH, bridgecontractABI, signer);
-        setCallResponse({
-          status: 'pending',
-          message: `Please send the bridge transaction`,
-        })
-
-        const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData);
-        console.log('Transaction sent! Hash:', tx.hash);
-        setCallProcessing(true)
-        setCallResponse(null)
-
-        const receipt = await tx.wait()
-        const { status } = { ...receipt }
-        failed = !status
-        setXcallData(receipt)
-        setCallResponse({
-          status: failed ? 'failed' : 'success',
-          message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
-          tx_hash: tx.hash,
-        })
         return
       }
 
