@@ -83,7 +83,7 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/goerli.png",
+    "image": "/logos/chains/blast.png",
     "color": "#636890",
     "no_pool": true
   },

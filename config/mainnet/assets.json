@@ -546,6 +546,12 @@
         "chain_id": 34443,
         "decimals": 18,
         "symbol": "ezETH"
+      },
+      {
+        "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        "chain_id": 81457,
+        "decimals": 18,
+        "symbol": "ezETH"
       }
     ],
     "preset": true

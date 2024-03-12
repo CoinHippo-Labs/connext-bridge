@@ -316,5 +316,34 @@
     "unwrapper_contract": "0xd0646a7F776330f5DEf68b2ed088663d8c9d921A",
     "coingecko_id": "base",
     "gas_coingecko_id": "ethereum"
+  },
+  {
+    "id": "blast",
+    "chain_id": 81457,
+    "domain_id": "6648936",
+    "name": "Blast",
+    "short_name": "BLAST",
+    "rpcs": [
+      "https://rpc.blast.io",
+      "https://blast.blockpi.network/v1/rpc/public"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Etherscan",
+      "url": "https://blastscan.io/",
+      "icon": "/logos/explorers/etherscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/blast.png",
+    "color": "#636890",
+    "no_pool": true
   }
 ]
