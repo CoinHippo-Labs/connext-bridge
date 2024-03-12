@@ -1761,7 +1761,7 @@ export default () => {
                         </h1>
                         {source !== 'pool' && (
                           <Options
-                            disabled={disabled}
+                            disabled={disabled || destination_chain_data?.chain_id === 81457}
                             applied={!_.isEqual(Object.fromEntries(Object.entries(options).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))), Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))))}
                             initialData={options}
                             onChange={
