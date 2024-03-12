@@ -869,7 +869,7 @@ export default () => {
             const approveLockboxTx = await tokenContract.approve(source_contract_data?.lockbox, _amount)
             setApproveResponse({
               status: 'pending',
-              message: `Preparing ${symbol} for sendoff`,
+              message: `Preparing ${symbol} for transfer`,
               tx_hash: approveLockboxTx.hash,
             })
             setApproveProcessing(true)
@@ -882,7 +882,7 @@ export default () => {
           }
           setCallResponse({
             status: 'pending',
-            message: `Preparing ${symbol} for sendoff`
+            message: `Preparing ${symbol} for transfer`
           })
 
           const depositTx = await lockbox.deposit(_amount)
@@ -895,6 +895,7 @@ export default () => {
           // Bridge xERC20
           if (readableAllowance < amount) {
             const approveTx = await xERC20Contract.approve(bridgeAddress, _amount)
+            setCallResponse(null)
             setApproveResponse({
               status: 'pending',
               message: `Approving ${symbol} to Blast Bridge`,
@@ -2467,6 +2468,7 @@ export default () => {
                                     </div>
                                   )}
                                   closeDisabled={true}
+                                  href={blastscan.io} _target="_blank"
                                 >
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between space-x-2">
