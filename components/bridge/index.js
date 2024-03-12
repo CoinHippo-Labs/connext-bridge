@@ -842,25 +842,60 @@ export default () => {
         const withdrawABI = [
           'function withdraw(address _l2Token,uint256 _amount,uint32 _minGasLimit,bytes calldata _extraData)' 
         ]
+        const lockboxInterface = new utils.Interface([
+          'function deposit(uint256 _amount)',
+          'function withdraw(uint256 _amount)',
+        ])
 
         const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? bridgeAddressETH : brideAddressBlast
         if(source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111) {
-        
   
-  
-          const _localToken = source_contract_data?.contract_address;
+          const _localToken = source_contract_data?.xERC20;
           const _remoteToken = destination_contract_data?.contract_address;
           const _amount = parseUnits(amount, sourceDecimals)
           const _minGasLimit = 500000; 
           const _extraData = '0x';
   
-  
+          const lockbox = new Contract(source_contract_data?.lockbox, lockboxInterface, signer)
           const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
-          const allowance = await tokenContract.allowance(address, bridgeAddress)
+          const xERC20Contract = new Contract(source_contract_data?.xERC20, approveABI, signer)
+          const Lallowance = await tokenContract.allowance(address, source_contract_data?.lockbox)
+          const LreadableAllowance = utils.formatUnits(Lallowance, sourceDecimals);
+
+          if(LreadableAllowance < amount) {
+            const approveLTX = await tokenContract.approve(source_contract_data?.lockbox, _amount);
+            setApproveResponse({
+              status: 'pending',
+              message: `Approving ${symbol} to lockbox`,
+              tx_hash: approveLTX.hash,
+            })
+            setApproveProcessing(true)
+            const appReciept = await approveLTX.wait()
+            const { status } = { ...appReciept }
+            failed = !status
+  
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveLTX.hash })
+            setApproveProcessing(false)
+          }
+          setCallResponse({
+            status: 'pending',
+            message: `Deposting to Lockbox`,
+          })
+
+          const deposit = await lockbox.deposit(_amount)
+          const depositrec = await deposit.wait()
+          const { status: stat } = { ...depositrec }
+          failed = !stat
+
+          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to Deposit into lockbox`, tx_hash: approveTX.hash })
+          setApproveProcessing(false)
+
+
+          const allowance = await xERC20Contract.allowance(address, bridgeAddress)
           const readableAllowance = utils.formatUnits(allowance, sourceDecimals);
          
           if((readableAllowance) < (amount)) {
-            const approveTX = await tokenContract.approve(bridgeAddress, _amount);
+            const approveTX = await xERC20Contract.approve(bridgeAddress, _amount);
             setApproveResponse({
               status: 'pending',
               message: `Waiting for ${symbol} approval`,
