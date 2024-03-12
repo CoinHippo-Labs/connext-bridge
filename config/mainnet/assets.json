@@ -569,7 +569,8 @@
         "symbol": "ezETH"
       }
     ],
-    "preset": true
+    "preset": true,
+    "exclude_source_chains": ["blast"]
   },
   {
     "id": "radar",
