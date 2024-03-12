@@ -511,5 +511,33 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "xGovT",
+    "symbol": "xGovT",
+    "name": "xGovernTest",
+    "image": "/logos/assets/tkn.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xb8F010bC74e4de27d9e69063F3faf5F7317831d3",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "xGovT"
+      },
+      {
+        "contract_address": "0xB91471be67c8F2Ada2Cd36cA5EB439B017B80a37",
+        "chain_id": 59140,
+        "decimals": 18,
+        "symbol": "xGovT"
+      },
+      {
+        "contract_address": "0xB91471be67c8F2Ada2Cd36cA5EB439B017B80a37",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "xGovT"
+      }
+    ],
+    "color": "#000000"
   }
 ]
