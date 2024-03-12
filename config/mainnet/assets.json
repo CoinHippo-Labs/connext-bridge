@@ -173,6 +173,21 @@
         },
         "wrappable": true,
         "is_pool": true
+      },
+      {
+        "contract_address": "0x4200000000000000000000000000000000000006",
+        "chain_id": 34443,
+        "decimals": 18,
+        "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
+        "next_asset": {
+          "contract_address": "0x609aEfb9FB2Ee8f2FDAd5dc48efb8fA4EE0e80fB",
+          "decimals": 18,
+          "symbol": "nextWETH",
+          "image": "/logos/assets/nextweth.png"
+        },
+        "wrappable": true,
+        "is_pool": true
       }
     ],
     "color": "#636890",
