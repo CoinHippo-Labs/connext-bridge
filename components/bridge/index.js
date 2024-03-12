@@ -928,55 +928,7 @@ export default () => {
           })
 
           return
-        } else { // Withdraw from Blast to Eth/Sepolia
-          const _l2Token = source_contract_data?.contract_address
-          const _amount = parseUnits(amount, sourceDecimals)
-          const _minGasLimit = 400000
-          const _extraData = '0x'
-
-          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
-          const allowance = await tokenContract.allowance(address, bridgeAddress)
-          const readableAllowance = utils.formatUnits(allowance, sourceDecimals)
-
-          if((readableAllowance) < (amount)) {
-            const approveTX = await tokenContract.approve(bridgeAddress, _amount)
-            setApproveResponse({
-              status: 'pending',
-              message: `Waiting for ${symbol} approval`,
-              tx_hash: approveTX.hash,
-            })
-            setApproveProcessing(true)
-  
-            const approveReceipt = await approveTX.wait()
-            failed = !approveReceipt.status;
-  
-            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
-            setApproveProcessing(false)
-          }
-          setApproving(false)
-
-          const contract = new Contract(bridgeAddress, withdrawABI, signer);
-          setCallResponse({
-            status: 'pending',
-            message: `Please send the bridge transaction`,
-          })
-  
-          const tx = await contract.withdraw(_l2Token, _amount, _minGasLimit, _extraData);
-          console.log('Transaction sent! Hash:', tx.hash);
-          setCallProcessing(true)
-          setCallResponse(null)
-  
-          const receipt = await tx.wait()
-          failed = !receipt.status;
-          setXcallData(receipt)
-          setCallResponse({
-            status: failed ? 'failed' : 'success',
-            message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
-            tx_hash: tx.hash,
-          })
-        }
-
-        return
+        } 
       }
 
       const xcallParams = {
