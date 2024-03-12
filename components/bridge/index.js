@@ -869,7 +869,7 @@ export default () => {
             const approveLockboxTx = await tokenContract.approve(source_contract_data?.lockbox, _amount)
             setApproveResponse({
               status: 'pending',
-              message: `Approving ${symbol} to Lockbox`,
+              message: `Preparing ${symbol} for sendoff`,
               tx_hash: approveLockboxTx.hash,
             })
             setApproveProcessing(true)
@@ -882,14 +882,14 @@ export default () => {
           }
           setCallResponse({
             status: 'pending',
-            message: 'Depositing to Lockbox'
+            message: `Preparing ${symbol} for sendoff`
           })
 
           const depositTx = await lockbox.deposit(_amount)
           const depositReceipt = await depositTx.wait()
           failed = !depositReceipt.status;
 
-          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to deposit into lockbox`, tx_hash: depositTx.hash })
+          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to deposit`, tx_hash: depositTx.hash })
           setApproveProcessing(false)
 
           // Bridge xERC20
@@ -909,7 +909,7 @@ export default () => {
           const contract = new Contract(bridgeAddress, bridgeContractABI, signer)
           setCallResponse({
             status: 'pending',
-            message: `Please send the bridge transaction`,
+            message: `Ready, please send transfer!`,
           })
   
           const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData)
@@ -922,13 +922,12 @@ export default () => {
           setXcallData(receipt)
           setCallResponse({
             status: failed ? 'failed' : 'success',
-            message: failed ? 'Failed to send transaction' : `Bridging ${symbol}. Tx hash: ${tx.hash}`,
+            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}. Tx hash: ${tx.hash}`,
             tx_hash: tx.hash,
           })
 
           return
         } else { // Withdraw from Blast to Eth/Sepolia
-          console.log('withdraw from blast')
           const _l2Token = source_contract_data?.contract_address
           const _amount = parseUnits(amount, sourceDecimals)
           const _minGasLimit = 400000
@@ -1761,7 +1760,7 @@ export default () => {
                         </h1>
                         {source !== 'pool' && (
                           <Options
-                            disabled={disabled || destination_chain_data?.chain_id === 81457}
+                            disabled={disabled || destination_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 81457}
                             applied={!_.isEqual(Object.fromEntries(Object.entries(options).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))), Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))))}
                             initialData={options}
                             onChange={
@@ -2167,7 +2166,7 @@ export default () => {
                                       <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                         <NumberDisplay 
                                           value={
-                                            destination_chain_data.chain_id === 81457 
+                                            destination_chain_data.chain_id === 168587773 || destination_chain_data.chain_id === 81457 
                                             ? 0 
                                             : (Number(relayerFee) > 0 ? relayerFee : 0)
                                           } 
@@ -2350,7 +2349,7 @@ export default () => {
                                 </div>
                                 <Tooltip 
                                   content={
-                                    destination_chain_data.chain_id === 81457 
+                                    destination_chain_data.chain_id === 168587773 || destination_chain_data.chain_id === 81457 
                                     ? 'This timing is subject to the Blast Canonical Bridge' 
                                     : (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) 
                                       ? 'Unable to leverage fast liquidity. Your transfer will still complete.' 
@@ -2360,7 +2359,7 @@ export default () => {
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
                                       {
-                                        destination_chain_data?.chain_id === 81457 ?
+                                        destination_chain_data.chain_id === 168587773 || destination_chain_data?.chain_id === 81457 ?
                                         <span className="text-green-600 dark:text-green-500">
                                           {'<5 mins'}
                                         </span> :
