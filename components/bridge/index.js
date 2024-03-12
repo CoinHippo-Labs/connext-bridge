@@ -39,6 +39,7 @@ import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero }
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
+
 const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: false,
@@ -689,6 +690,11 @@ export default () => {
       const destinationDomain = destination_chain_data?.domain_id
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? original_source_contract_data : source_contract_data)?.contract_address
 
+      // Special handling for Blast
+      if (source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773 || source_chain_data?.chain_id === 81457 || destination_chain_data?.chain_id === 81457) {
+        setEstimatedValues({amountReceived: _amount, routerFee: '0', slippage: 0})
+        return _amount
+      }
       const { contract_address, next_asset } = { ...original_destination_contract_data }
       let destinationTokenAddress = contract_address
       const isNextAsset = typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, next_asset?.contract_address)
@@ -766,6 +772,7 @@ export default () => {
 
     let success = false
     let failed = false
+
     if (sdk) {
       const { source_chain, destination_chain, asset, amount, receive_wrap } = { ...bridge }
       let { symbol } = { ...bridge }
@@ -816,6 +823,161 @@ export default () => {
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
 
+      // Handle Blast canonical bridge flow
+      if (source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773 || source_chain_data?.chain_id === 81457 || destination_chain_data?.chain_id === 81457) {
+        let L1StandardBridgeProxy = '0x697402166Fbf2F22E970df8a6486Ef171dbfc524'
+        let L2StandardBridge = '0x4200000000000000000000000000000000000010'
+        if (NETWORK === 'testnet') {
+          L1StandardBridgeProxy = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f'
+          L2StandardBridge = '0x4200000000000000000000000000000000000010'
+        }
+        const bridgeContractABI = [
+          'function bridgeERC20(address _localToken, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)'
+        ];
+        const approveABI = [
+          'function approve(address spender, uint256 amount)',
+          'function allowance(address owner, address spender) external view returns (uint256)'
+        ];
+        const withdrawABI = [
+          'function withdraw(address _l2Token,uint256 _amount,uint32 _minGasLimit,bytes calldata _extraData)' 
+        ]
+        const lockboxInterface = new utils.Interface([
+          'function deposit(uint256 _amount)',
+          'function withdraw(uint256 _amount)',
+        ])
+
+        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? L1StandardBridgeProxy : L2StandardBridge
+
+        // Deposit from Eth/Sepolia to Blast
+        if (source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111) {
+          const _localToken = source_contract_data?.xERC20
+          const _remoteToken = destination_contract_data?.contract_address
+          const _amount = parseUnits(amount, sourceDecimals)
+          const _minGasLimit = 500000
+          const _extraData = '0x'
+  
+          const lockbox = new Contract(source_contract_data?.lockbox, lockboxInterface, signer)
+          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
+          const xERC20Contract = new Contract(source_contract_data?.xERC20, approveABI, signer)
+          const lockboxAllowance = await tokenContract.allowance(address, source_contract_data?.lockbox)
+          const lockboxReadableAllowance = utils.formatUnits(lockboxAllowance, sourceDecimals)
+          const allowance = await xERC20Contract.allowance(address, bridgeAddress)
+          const readableAllowance = utils.formatUnits(allowance, sourceDecimals)
+
+          // Deposit into Lockbox
+          if (lockboxReadableAllowance < amount) {
+            const approveLockboxTx = await tokenContract.approve(source_contract_data?.lockbox, _amount)
+            setApproveResponse({
+              status: 'pending',
+              message: `Preparing ${symbol} for sendoff`,
+              tx_hash: approveLockboxTx.hash,
+            })
+            setApproveProcessing(true)
+            const receipt = await approveLockboxTx.wait()
+            let { status } = { ...receipt }
+            failed = !status
+  
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveLockboxTx.hash })
+            setApproveProcessing(false)
+          }
+          setCallResponse({
+            status: 'pending',
+            message: `Preparing ${symbol} for sendoff`
+          })
+
+          const depositTx = await lockbox.deposit(_amount)
+          const depositReceipt = await depositTx.wait()
+          failed = !depositReceipt.status;
+
+          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to deposit`, tx_hash: depositTx.hash })
+          setApproveProcessing(false)
+
+          // Bridge xERC20
+          if (readableAllowance < amount) {
+            const approveTx = await xERC20Contract.approve(bridgeAddress, _amount)
+            setApproveResponse({
+              status: 'pending',
+              message: `Approving ${symbol} to Blast Bridge`,
+              tx_hash: approveTx.hash,
+            })
+            setApproveProcessing(true)
+  
+            const approveReceipt = await approveTx.wait()
+            failed = !approveReceipt.status;
+          }
+
+          const contract = new Contract(bridgeAddress, bridgeContractABI, signer)
+          setCallResponse({
+            status: 'pending',
+            message: `Ready, please send transfer!`,
+          })
+  
+          const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData)
+          console.log('Transaction sent! Hash:', tx.hash)
+          setCallProcessing(true)
+          setCallResponse(null)
+  
+          const receipt = await tx.wait()
+          failed = !receipt.status;
+          setXcallData(receipt)
+          setCallResponse({
+            status: failed ? 'failed' : 'success',
+            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}. Tx hash: ${tx.hash}`,
+            tx_hash: tx.hash,
+          })
+
+          return
+        } else { // Withdraw from Blast to Eth/Sepolia
+          const _l2Token = source_contract_data?.contract_address
+          const _amount = parseUnits(amount, sourceDecimals)
+          const _minGasLimit = 400000
+          const _extraData = '0x'
+
+          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
+          const allowance = await tokenContract.allowance(address, bridgeAddress)
+          const readableAllowance = utils.formatUnits(allowance, sourceDecimals)
+
+          if((readableAllowance) < (amount)) {
+            const approveTX = await tokenContract.approve(bridgeAddress, _amount)
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${symbol} approval`,
+              tx_hash: approveTX.hash,
+            })
+            setApproveProcessing(true)
+  
+            const approveReceipt = await approveTX.wait()
+            failed = !approveReceipt.status;
+  
+            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveTX.hash })
+            setApproveProcessing(false)
+          }
+          setApproving(false)
+
+          const contract = new Contract(bridgeAddress, withdrawABI, signer);
+          setCallResponse({
+            status: 'pending',
+            message: `Please send the bridge transaction`,
+          })
+  
+          const tx = await contract.withdraw(_l2Token, _amount, _minGasLimit, _extraData);
+          console.log('Transaction sent! Hash:', tx.hash);
+          setCallProcessing(true)
+          setCallResponse(null)
+  
+          const receipt = await tx.wait()
+          failed = !receipt.status;
+          setXcallData(receipt)
+          setCallResponse({
+            status: failed ? 'failed' : 'success',
+            message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
+            tx_hash: tx.hash,
+          })
+        }
+
+        return
+      }
+
       const xcallParams = {
         origin: source_domain,
         destination: destination_domain,
@@ -843,7 +1005,6 @@ export default () => {
       // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
       if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
         let amountToApprove
-        console.log(source_contract_data, "prathmesh")
         try {
           amountToApprove = parseUnits(amount, sourceDecimals)
           console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
@@ -1599,7 +1760,7 @@ export default () => {
                         </h1>
                         {source !== 'pool' && (
                           <Options
-                            disabled={disabled}
+                            disabled={disabled || destination_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 81457}
                             applied={!_.isEqual(Object.fromEntries(Object.entries(options).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))), Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))))}
                             initialData={options}
                             onChange={
@@ -2003,7 +2164,14 @@ export default () => {
                                   {fees ?
                                     <div className="flex items-center space-x-1.5">
                                       <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                        <NumberDisplay value={Number(relayerFee) > 0 ? relayerFee : 0} className="text-sm 3xl:text-xl" />
+                                        <NumberDisplay 
+                                          value={
+                                            destination_chain_data.chain_id === 168587773 || destination_chain_data.chain_id === 81457 
+                                            ? 0 
+                                            : (Number(relayerFee) > 0 ? relayerFee : 0)
+                                          } 
+                                          className="text-sm 3xl:text-xl" 
+                                        />
                                         <span>{relayerFeeAssetType === 'transacting' ? sourceSymbol : native_token?.symbol}</span>
                                       </span>
                                       <button
@@ -2179,12 +2347,25 @@ export default () => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip 
+                                  content={
+                                    destination_chain_data.chain_id === 168587773 || destination_chain_data.chain_id === 81457 
+                                    ? 'This timing is subject to the Blast Canonical Bridge' 
+                                    : (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) 
+                                      ? 'Unable to leverage fast liquidity. Your transfer will still complete.' 
+                                      : 'Fast transfer enabled by Connext router network.'
+                                  }
+                                >
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
+                                      {
+                                        destination_chain_data.chain_id === 168587773 || destination_chain_data?.chain_id === 81457 ?
+                                        <span className="text-green-600 dark:text-green-500">
+                                          {'<5 mins'}
+                                        </span> :
+                                        (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
-                                          {'<2 hours'}
+                                          {'<5 hours'}
                                         </span> :
                                         <span className="text-green-600 dark:text-green-500">
                                           {'<4 minutes'}
