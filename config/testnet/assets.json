@@ -511,5 +511,30 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "xezETH",
+    "symbol": "xezETH",
+    "name": "Cross Chain ezETH",
+    "image": "/logos/assets/eth.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x1deC1c27ed18caF81BE7093d8eD563fe48919F82",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "xezETH",
+        "xERC20": "0xe60EEEEE9503D59c7db940889228fAceB0aF5DF2",
+        "lockbox": "0x2710d059B27Eaef847314aca15e8512B0938D7aa",
+        "lockbox_adapter": "0x8528d3B173a149CB0eae5e2d7335123bcF888c9f"
+      },
+      {
+        "contract_address": "0xe60EEEEE9503D59c7db940889228fAceB0aF5DF2",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "xezETH"
+      }
+    ],
+    "color": "#000000"
   }
 ]
