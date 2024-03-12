@@ -825,10 +825,10 @@ export default () => {
 
       // Handle Blast canonical bridge flow
       if (source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773 || source_chain_data?.chain_id === 81457 || destination_chain_data?.chain_id === 81457) {
-        let L1BlastBridgeProxy = '0x3a05E5d33d7Ab3864D53aaEc93c8301C1Fa49115'
+        let L1StandardBridgeProxy = '0x697402166Fbf2F22E970df8a6486Ef171dbfc524'
         let L2StandardBridge = '0x4200000000000000000000000000000000000010'
         if (NETWORK === 'testnet') {
-          L1BlastBridgeProxy = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f'
+          L1StandardBridgeProxy = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f'
           L2StandardBridge = '0x4200000000000000000000000000000000000010'
         }
         const bridgeContractABI = [
@@ -846,7 +846,7 @@ export default () => {
           'function withdraw(uint256 _amount)',
         ])
 
-        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? L1BlastBridgeProxy : L2StandardBridge
+        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? L1StandardBridgeProxy : L2StandardBridge
 
         // Deposit from Eth/Sepolia to Blast
         if (source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111) {
@@ -922,7 +922,7 @@ export default () => {
           setXcallData(receipt)
           setCallResponse({
             status: failed ? 'failed' : 'success',
-            message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. Tx hash: ${tx.hash} `,
+            message: failed ? 'Failed to send transaction' : `Bridging ${symbol}. Tx hash: ${tx.hash}`,
             tx_hash: tx.hash,
           })
 
@@ -2165,7 +2165,14 @@ export default () => {
                                   {fees ?
                                     <div className="flex items-center space-x-1.5">
                                       <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                        <NumberDisplay value={Number(relayerFee) > 0 ? relayerFee : 0} className="text-sm 3xl:text-xl" />
+                                        <NumberDisplay 
+                                          value={
+                                            destination_chain_data.chain_id === 81457 
+                                            ? 0 
+                                            : (Number(relayerFee) > 0 ? relayerFee : 0)
+                                          } 
+                                          className="text-sm 3xl:text-xl" 
+                                        />
                                         <span>{relayerFeeAssetType === 'transacting' ? sourceSymbol : native_token?.symbol}</span>
                                       </span>
                                       <button
