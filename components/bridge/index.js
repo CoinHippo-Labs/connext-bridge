@@ -2341,10 +2341,23 @@ export default () => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip 
+                                  content={
+                                    destination_chain_data.chain_id === 81457 
+                                    ? 'This timing is subject to the Blast Canonical Bridge' 
+                                    : (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) 
+                                      ? 'Unable to leverage fast liquidity. Your transfer will still complete.' 
+                                      : 'Fast transfer enabled by Connext router network.'
+                                  }
+                                >
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
+                                      {
+                                        destination_chain_data?.chain_id === 81457 ?
+                                        <span className="text-green-600 dark:text-green-500">
+                                          {'<5 mins'}
+                                        </span> :
+                                        (Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<5 hours'}
                                         </span> :
