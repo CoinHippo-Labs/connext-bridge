@@ -1922,11 +1922,18 @@ export default () => {
                             disabled={disabled}
                             value={asset}
                             onSelect={
-                              (a, s) => {
+                              (a, s, notPartOfChain) => {
                                 const source_asset_data = getAssetData(a, assets_data)
+                                
+                                let _source_chain = bridge.source_chain
+                                if (notPartOfChain) {
+                                  //set to first valid chain for the asset
+                                  _source_chain = _.head(getChainData(undefined, chains_data, { not_disabled: true, except: destination_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id
+                                }
+
                                 const destination_contract_data = getContractData(destination_chain_data?.chain_id, source_asset_data?.contracts)
                                 const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(getChainData(undefined, chains_data, { not_disabled: true, except: source_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id : destination_chain
-                                setBridge({ ...bridge, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
+                                setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
                                 if (a !== asset) {
                                   getBalances(source_chain)
                                   getBalances(destination_chain)
@@ -2020,7 +2027,7 @@ export default () => {
                                 disabled={disabled}
                                 value={asset}
                                 onSelect={
-                                  (a, s) => {
+                                  (a, s, notPartOfChain) => {
                                     if (!(source === 'pool' || !isWrappableAsset)) {
                                       setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
                                       if (a !== asset) {
