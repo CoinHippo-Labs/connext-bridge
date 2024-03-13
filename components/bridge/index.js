@@ -100,6 +100,7 @@ export default () => {
   const [calling, setCalling] = useState(null)
   const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
+  const [txLink, setTxLink] = useState(null)
 
   const [balanceTrigger, setBalanceTrigger] = useState(null)
   const [transfersTrigger, setTransfersTrigger] = useState(null)
@@ -896,9 +897,10 @@ export default () => {
           setXcallData(receipt)
           setCallResponse({
             status: failed ? 'failed' : 'success',
-            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}. Tx hash: ${tx.hash}`,
+            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}! `,
             tx_hash: tx.hash,
           })
+          setTxLink(`https://etherscan.io/${tx.hash}`)
 
           return
         } 
@@ -2410,6 +2412,14 @@ export default () => {
                                     <div className="flex items-center justify-between space-x-2">
                                       <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
                                         {ellipse(normalizeMessage(message, status), 128)}
+                                        {' '}{txLink && (<a
+                                          href={`txLink`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="underline"
+                                        >
+                                          See transaction.
+                                        </a>)}
                                       </span>
                                       <div className="flex items-center space-x-1">
                                         {status === 'failed' && message && <Copy value={message} className="cursor-pointer text-slate-200 hover:text-white" />}
