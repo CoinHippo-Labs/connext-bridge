@@ -831,70 +831,42 @@ export default () => {
           L1StandardBridgeProxy = '0xDeDa8D3CCf044fE2A16217846B6e1f1cfD8e122f'
           L2StandardBridge = '0x4200000000000000000000000000000000000010'
         }
+
+        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? L1StandardBridgeProxy : L2StandardBridge
+        const adapter = source_contract_data?.lockbox_adapter_blast
+
+        const adapterABI = [
+          'function bridgeTo(address _to, address _erc20, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes calldata _extraData)'
+        ]
         const bridgeContractABI = [
-          'function bridgeERC20(address _localToken, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)'
-        ];
+          'function bridgeERC20(address _localToken, address _remoteToken, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)',
+          'function bridgeERC20To(address _localToken, address _remoteToken, address _to, uint256 _amount, uint32 _minGasLimit, bytes memory _extraData)'
+        ]
         const approveABI = [
           'function approve(address spender, uint256 amount)',
           'function allowance(address owner, address spender) external view returns (uint256)'
-        ];
-        const withdrawABI = [
-          'function withdraw(address _l2Token,uint256 _amount,uint32 _minGasLimit,bytes calldata _extraData)' 
         ]
         const lockboxInterface = new utils.Interface([
           'function deposit(uint256 _amount)',
           'function withdraw(uint256 _amount)',
         ])
 
-        const bridgeAddress = source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111 ? L1StandardBridgeProxy : L2StandardBridge
-
         // Deposit from Eth/Sepolia to Blast
         if (source_chain_data?.chain_id === 1 || source_chain_data?.chain_id === 11155111) {
-          const _localToken = source_contract_data?.xERC20
           const _remoteToken = destination_contract_data?.contract_address
           const _amount = parseUnits(amount, sourceDecimals)
-          const _minGasLimit = 500000
+          const _minGasLimit = 1000
           const _extraData = '0x'
-  
-          const lockbox = new Contract(source_contract_data?.lockbox, lockboxInterface, signer)
-          const tokenContract = new Contract(source_contract_data?.contract_address, approveABI, signer)
-          const xERC20Contract = new Contract(source_contract_data?.xERC20, approveABI, signer)
-          const lockboxAllowance = await tokenContract.allowance(address, source_contract_data?.lockbox)
-          const lockboxReadableAllowance = utils.formatUnits(lockboxAllowance, sourceDecimals)
-          const allowance = await xERC20Contract.allowance(address, bridgeAddress)
-          const readableAllowance = utils.formatUnits(allowance, sourceDecimals)
+          
+          const _erc20 = source_contract_data?.contract_address
+          const ERC20Contract = new Contract(_erc20, approveABI, signer)
 
-          // Deposit into Lockbox
-          if (lockboxReadableAllowance < amount) {
-            const approveLockboxTx = await tokenContract.approve(source_contract_data?.lockbox, _amount)
-            setApproveResponse({
-              status: 'pending',
-              message: `Preparing ${symbol} for transfer`,
-              tx_hash: approveLockboxTx.hash,
-            })
-            setApproveProcessing(true)
-            const receipt = await approveLockboxTx.wait()
-            let { status } = { ...receipt }
-            failed = !status
-  
-            setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: approveLockboxTx.hash })
-            setApproveProcessing(false)
-          }
-          setCallResponse({
-            status: 'pending',
-            message: `Preparing ${symbol} for transfer`
-          })
+          const adapterAllowance = await ERC20Contract.allowance(address, adapter)
+          const readableAdapterAllowance = utils.formatUnits(adapterAllowance, sourceDecimals)
 
-          const depositTx = await lockbox.deposit(_amount)
-          const depositReceipt = await depositTx.wait()
-          failed = !depositReceipt.status;
-
-          setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to deposit`, tx_hash: depositTx.hash })
-          setApproveProcessing(false)
-
-          // Bridge xERC20
-          if (readableAllowance < amount) {
-            const approveTx = await xERC20Contract.approve(bridgeAddress, _amount)
+          // Approve adapter
+          if (readableAdapterAllowance < amount) {
+            const approveTx = await ERC20Contract.approve(adapter, _amount)
             setCallResponse(null)
             setApproveResponse({
               status: 'pending',
@@ -907,13 +879,14 @@ export default () => {
             failed = !approveReceipt.status;
           }
 
-          const contract = new Contract(bridgeAddress, bridgeContractABI, signer)
+          const adapterContract = new Contract(adapter, adapterABI, signer)
           setCallResponse({
             status: 'pending',
             message: `Ready, please send transfer!`,
           })
   
-          const tx = await contract.bridgeERC20(_localToken, _remoteToken, _amount, _minGasLimit, _extraData)
+          // Call bridgeTo on adapter
+          const tx = await adapterContract.bridgeTo(address, _erc20, _remoteToken, _amount, _minGasLimit, _extraData)
           console.log('Transaction sent! Hash:', tx.hash)
           setCallProcessing(true)
           setCallResponse(null)
