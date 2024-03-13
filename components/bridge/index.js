@@ -900,7 +900,7 @@ export default () => {
             message: failed ? 'Failed to send transaction' : `Bridged ${symbol}! `,
             tx_hash: tx.hash,
           })
-          setTxLink(`https://etherscan.io/${tx.hash}`)
+          setTxLink(`https://etherscan.io/tx/${tx.hash}`)
 
           return
         } 
@@ -2413,7 +2413,7 @@ export default () => {
                                       <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
                                         {ellipse(normalizeMessage(message, status), 128)}
                                         {' '}{txLink && (<a
-                                          href={`txLink`}
+                                          href={txLink}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="underline"
