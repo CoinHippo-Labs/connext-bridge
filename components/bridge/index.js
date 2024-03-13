@@ -100,6 +100,7 @@ export default () => {
   const [calling, setCalling] = useState(null)
   const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
+  const [txLink, setTxLink] = useState(null)
 
   const [balanceTrigger, setBalanceTrigger] = useState(null)
   const [transfersTrigger, setTransfersTrigger] = useState(null)
@@ -824,7 +825,18 @@ export default () => {
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
 
       // Handle Blast canonical bridge flow
+
+     
+
       if (source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773 || source_chain_data?.chain_id === 81457 || destination_chain_data?.chain_id === 81457) {
+        if(destination_chain_data?.chain_id === 81457 && source_chain_data?.chain_id !== 1){
+          setCallResponse({
+            status: 'failed',
+            message: `ezETH can be only bridged to blast from Ethereum`,
+            tx_hash: '0x',
+          })
+          return
+        }
         let L1StandardBridgeProxy = '0x697402166Fbf2F22E970df8a6486Ef171dbfc524'
         let L2StandardBridge = '0x4200000000000000000000000000000000000010'
         if (NETWORK === 'testnet') {
@@ -896,9 +908,10 @@ export default () => {
           setXcallData(receipt)
           setCallResponse({
             status: failed ? 'failed' : 'success',
-            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}. Tx hash: ${tx.hash}`,
+            message: failed ? 'Failed to send transaction' : `Bridged ${symbol}! `,
             tx_hash: tx.hash,
           })
+          setTxLink(`https://etherscan.io/tx/${tx.hash}`)
 
           return
         } 
@@ -2417,6 +2430,14 @@ export default () => {
                                     <div className="flex items-center justify-between space-x-2">
                                       <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
                                         {ellipse(normalizeMessage(message, status), 128)}
+                                        {' '}{txLink && (<a
+                                          href={txLink}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="underline"
+                                        >
+                                          See transaction.
+                                        </a>)}
                                       </span>
                                       <div className="flex items-center space-x-1">
                                         {status === 'failed' && message && <Copy value={message} className="cursor-pointer text-slate-200 hover:text-white" />}
