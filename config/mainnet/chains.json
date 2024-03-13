@@ -344,7 +344,6 @@
     },
     "image": "/logos/chains/blast.png",
     "color": "#636890",
-    "no_pool": true,
-    "disabled": true
+    "no_pool": true
   }
 ]
