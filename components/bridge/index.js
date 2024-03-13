@@ -1746,6 +1746,12 @@ export default () => {
                             destination={destination_chain}
                             origin="from"
                             fixed={source === 'pool'}
+                            include={
+                              destination_chain === 'blast' ? ['ethereum'] :
+                              chains_data
+                                .filter(chain => !['blast'].includes(chain.id))
+                                .map(chain => chain.id)
+                            }
                           />
                         </div>
                         <div className="flex items-center justify-center mt-5.5 sm:mt-7">
