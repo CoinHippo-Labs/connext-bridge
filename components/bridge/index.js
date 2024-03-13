@@ -825,15 +825,11 @@ export default () => {
       const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayerFeeDecimals) : '0')).toString()
 
       // Handle Blast canonical bridge flow
-
-     
-
       if (source_chain_data?.chain_id === 168587773 || destination_chain_data?.chain_id === 168587773 || source_chain_data?.chain_id === 81457 || destination_chain_data?.chain_id === 81457) {
         if(destination_chain_data?.chain_id === 81457 && source_chain_data?.chain_id !== 1){
           setCallResponse({
             status: 'failed',
-            message: `ezETH can be only bridged to blast from Ethereum`,
-            tx_hash: '0x',
+            message: `ezETH can only be bridged to Blast from Ethereum at this time.`
           })
           return
         }
