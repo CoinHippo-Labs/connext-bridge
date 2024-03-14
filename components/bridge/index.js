@@ -1055,7 +1055,6 @@ export default () => {
           // Lockbox handling for xERC20s
           const txs = []
           const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, 'multisend')
-
           if (source_asset_data?.is_xERC20) {
             if (!(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
               console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
@@ -1298,7 +1297,12 @@ export default () => {
               if (gasLimit) {
                 request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
               }
-            } catch (error) {}
+            } catch (error) {
+              // if it is contract wallet, hardcode gas limit on request otherwise will look for gas on wallet
+              if (await signer.provider.getCode(await signer.getAddress()) !== '0x'){
+                request.gasLimit = toBigNumber(toFixedNumber(1_000_000).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
+              }
+            }
             const response = await signer.sendTransaction(request)
             const { hash } = { ...response }
 
