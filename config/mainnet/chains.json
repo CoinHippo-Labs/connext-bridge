@@ -102,10 +102,7 @@
     "domain_id": "1836016741",
     "name": "Mode",
     "short_name": "MODE",
-    "rpcs": [
-      "https://1rpc.io/mode",
-      "https://mainnet.mode.network"
-    ],
+    "rpcs": ["https://1rpc.io/mode", "https://mainnet.mode.network"],
     "native_token": {
       "name": "Ethereum",
       "symbol": "ETH",
@@ -283,7 +280,8 @@
     },
     "image": "/logos/chains/metis.png",
     "color": "#00DACC",
-    "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774"
+    "unwrapper_contract": "0x8Ef3E1300857FDF616dfE2fcBced4ac6a61Fe774",
+    "disabled": true
   },
   {
     "id": "base",
