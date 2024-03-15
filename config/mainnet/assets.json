@@ -678,7 +678,8 @@
         }
       }
     ],
-    "color": "#000000"
+    "color": "#000000",
+    "exclude_source_chains": ["ethereum"]
   },
   {
     "id": "aleth",
@@ -718,7 +719,8 @@
         }
       }
     ],
-    "color": "#000000"
+    "color": "#000000",
+    "exclude_source_chains": ["ethereum"]
   },
   {
     "id": "kp3r",
