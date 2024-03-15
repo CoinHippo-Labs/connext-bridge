@@ -1298,10 +1298,12 @@ export default () => {
                 request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
               }
             } catch (error) {
-              // if it is contract wallet, hardcode gas limit on request otherwise will look for gas on wallet
-              if (await signer.provider.getCode(await signer.getAddress()) !== '0x'){
-                request.gasLimit = toBigNumber(toFixedNumber(1_000_000).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
-              }
+              // // if it is contract wallet, hardcode gas limit on request otherwise will look for gas on wallet
+              // if (await signer.provider.getCode(await signer.getAddress()) !== '0x'){
+              //   request.gasLimit = toBigNumber(toFixedNumber(1_000_000).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
+              // }
+              // hardcode gas limit, offload reverts to signer display
+              request.gasLimit = toBigNumber(toFixedNumber(1_000_000).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
             }
             const response = await signer.sendTransaction(request)
             const { hash } = { ...response }
