@@ -6,9 +6,10 @@
     "name": "Ethereum",
     "short_name": "ETH",
     "rpcs": [
-      "https://eth.llamarpc.com",
       "https://rpc.ankr.com/eth",
-      "https://mainnet.gateway.tenderly.co"
+      "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "https://ethereum.publicnode.com",
+      "https://1rpc.io/eth"
     ],
     "private_rpcs": [
       "https://eth-mainnet.g.alchemy.com/v2/aWJkilx5wJU1uL2UGOfqQRo4pl_hYyUA"
@@ -262,8 +263,9 @@
     "name": "Metis",
     "short_name": "METIS",
     "rpcs": [
+      "https://andromeda.metis.io/?owner=1088",
+      "https://metis.drpc.org",
       "https://metis-mainnet.public.blastapi.io",
-      "https://metis.api.onfinality.io/public",
       "https://metis-pokt.nodies.app"
     ],
     "native_token": {
