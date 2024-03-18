@@ -533,5 +533,31 @@
       }
     ],
     "preset": true
+  },
+  {
+    "id": "axrty",
+    "symbol": "AXRTY",
+    "name": "XXArtyfactX",
+    "image": "/logos/assets/arty.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x19E6782cfC3474Be1cD01BE7de9298F545F19258",
+        "chain_id": 80001,
+        "decimals": 6,
+        "symbol": "AXRTY",
+        "xERC20": "0xCd14ACD477263FE23486Ac2c156604aa5B077a61",
+        "lockbox": "0xDB3E7afF4Cf24071D15bF37E822bCb5499833d33",
+        "lockbox_adapter": "0xec531b272fa2b82efe49ef6d830c2d848753642a"
+      },
+      {
+        "contract_address": "0x0000000000000000000000000000000000000000",
+        "chain_id": 11155420,
+        "decimals": 18,
+        "symbol": "AXRTY",
+        "xERC20": "0xCd14ACD477263FE23486Ac2c156604aa5B077a61"
+      }
+    ],
+    "color": "#000000"
   }
 ]
