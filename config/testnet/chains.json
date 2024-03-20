@@ -1,44 +1,11 @@
 [
   {
-    "id": "goerli",
-    "chain_id": 5,
-    "domain_id": "1735353714",
-    "name": "Goerli",
-    "short_name": "GOR",
-    "rpcs": [
-      "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://goerli.blockpi.network/v1/rpc/public"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Etherscan",
-      "url": "https://goerli.etherscan.io",
-      "icon": "/logos/explorers/etherscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/goerli.png",
-    "color": "#636890",
-    "unwrapper_contract": "0xa6633d369A9C4C8A442ef104E8e293DA7b352Acd",
-    "no_pool": true
-  },
-  {
     "id": "sepolia",
     "chain_id": 11155111,
-    "domain_id": "1735353714",
+    "domain_id": "1936027759",
     "name": "Sepolia",
-    "short_name": "Sepolia",
-    "rpcs": [
-      "https://ethereum-sepolia-rpc.publicnode.com",
-      "https://eth-sepolia.public.blastapi.io"
-    ],
+    "short_name": "SEPOLIA",
+    "rpcs": ["https://rpc-sepolia.rockx.com", "https://rpc2.sepolia.org"],
     "native_token": {
       "name": "Ethereum",
       "symbol": "ETH",
@@ -56,17 +23,17 @@
     },
     "image": "/logos/chains/goerli.png",
     "color": "#636890",
-    "no_pool": true
+    "coingecko_id": "ethereum"
   },
   {
-    "id": "blast sepolia",
-    "chain_id": 168587773,
-    "domain_id": "1735353714",
-    "name": "Blast Sepolia Testnet",
-    "short_name": "Blast Sepolia",
+    "id": "opsepolia",
+    "chain_id": 11155420,
+    "domain_id": "1869640549",
+    "name": "OP-Sepolia",
+    "short_name": "OP-SEPOLIA",
     "rpcs": [
-      "https://sepolia.blast.io",
-      "https://eth-sepolia.public.blastapi.io"
+      "https://sepolia.optimism.io",
+      "https://optimism-sepolia.blockpi.network/v1/rpc/public"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -75,7 +42,7 @@
     },
     "explorer": {
       "name": "Etherscan",
-      "url": "https://testnet.blastscan.io/",
+      "url": "https://sepolia-optimism.etherscan.io/",
       "icon": "/logos/explorers/etherscan.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
@@ -83,57 +50,28 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/blast.png",
+    "image": "/logos/chains/goerli.png",
     "color": "#636890",
-    "no_pool": true
+    "coingecko_id": "ethereum"
   },
   {
-    "id": "polygon",
-    "chain_id": 80001,
-    "domain_id": "9991",
-    "name": "Polygon",
-    "short_name": "POLY",
+    "id": "arbsepolia",
+    "chain_id": 421614,
+    "domain_id": "1633842021",
+    "name": "ARB-Sepolia",
+    "short_name": "ARB-SEPOLIA",
     "rpcs": [
-      "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://polygon-mumbai-bor.publicnode.com"
-    ],
-    "native_token": {
-      "name": "Polygon",
-      "symbol": "MATIC",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Polygonscan",
-      "url": "https://mumbai.polygonscan.com",
-      "icon": "/logos/explorers/polygonscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/polygon.png",
-    "color": "#8247e5",
-    "unwrapper_contract": "0x1e0Db00EB08ceC7FFdA03c0Dbf224193E1563844"
-  },
-  {
-    "id": "optimism",
-    "chain_id": 420,
-    "domain_id": "1735356532",
-    "name": "Optimism",
-    "short_name": "OP",
-    "rpcs": [
-      "https://optimism-goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://optimism-goerli.publicnode.com"
+      "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
+      "https://public.stackup.sh/api/v1/node/arbitrum-sepolia"
     ],
     "native_token": {
       "name": "Ethereum",
-      "symbol": "oETH",
+      "symbol": "ETH",
       "decimals": 18
     },
     "explorer": {
       "name": "Etherscan",
-      "url": "https://goerli-optimism.etherscan.io",
+      "url": "https://sepolia.arbiscan.io/",
       "icon": "/logos/explorers/etherscan.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
@@ -141,120 +79,8 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/optimism.png",
-    "color": "#dc2626",
-    "unwrapper_contract": "0x08bDeFD0e4878A814Cb2fd11C033F3947251689f"
-  },
-  {
-    "id": "linea",
-    "chain_id": 59140,
-    "domain_id": "1668247156",
-    "name": "Linea",
-    "short_name": "LINEA",
-    "rpcs": ["https://rpc.goerli.linea.build"],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Linea",
-      "url": "https://goerli.lineascan.build",
-      "icon": "/logos/explorers/linea.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/linea.png",
-    "color": "#1d1d1d",
-    "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45",
-    "no_staging": true
-  },
-  {
-    "id": "polygon-zkevm",
-    "chain_id": 1442,
-    "domain_id": "1887071092",
-    "name": "Polygon zkEVM",
-    "short_name": "POLYZK",
-    "rpcs": [
-      "https://polygon-zkevm-testnet.blockpi.network/v1/rpc/public",
-      "https://rpc.public.zkevm-test.net"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Polygonscan",
-      "url": "https://testnet-zkevm.polygonscan.com",
-      "icon": "/logos/explorers/polygonscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/polygon-zkevm.png",
-    "color": "#8247e5",
-    "unwrapper_contract": "",
-    "disabled": true
-  },
-  {
-    "id": "zksync",
-    "chain_id": 280,
-    "domain_id": "2053862260",
-    "name": "ZKSync",
-    "short_name": "ZKSYNC",
-    "rpcs": [
-      "https://zksync-era-testnet.blockpi.network/v1/rpc",
-      "https://testnet.era.zksync.dev"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "ZKSync",
-      "url": "https://goerli.explorer.zksync.io",
-      "icon": "/logos/explorers/zksync.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/zksync.png",
-    "color": "#12142b",
-    "unwrapper_contract": ""
-  },
-  {
-    "id": "x1",
-    "chain_id": 195,
-    "domain_id": "2016506996",
-    "name": "X1",
-    "short_name": "X1",
-    "rpcs": ["https://testrpc.x1.tech", "https://x1testrpc.okx.com"],
-    "native_token": {
-      "name": "OKB",
-      "symbol": "OKB",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "OKB",
-      "url": "https://www.oklink.com/x1-test",
-      "icon": "/logos/explorers/x1.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/x1.png",
-    "color": "#000000",
-    "unwrapper_contract": ""
+    "image": "/logos/chains/goerli.png",
+    "color": "#636890",
+    "coingecko_id": "ethereum"
   }
 ]
