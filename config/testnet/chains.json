@@ -54,6 +54,7 @@
     "color": "#636890",
     "coingecko_id": "ethereum"
   },
+
   {
     "id": "arbsepolia",
     "chain_id": 421614,
