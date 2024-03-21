@@ -1168,5 +1168,31 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+      "id": "arty",
+      "symbol": "ARTY",
+      "name": "Artyfact",
+      "image": "/logos/assets/arty.png",
+      "is_xERC20": true,
+      "contracts": [
+          {
+              "contract_address": "0x617Cab4aAae1f8dfb3eE138698330776a1e1b324",
+              "chain_id": 56,
+              "decimals": 6,
+              "symbol": "XARTY",
+              "xERC20": "0xa92fe215ae1476Bf714C1C363CB730B079C4a745",
+              "lockbox": "0xDfe59Ce1D89E0D3d7aC0495CfE58A05bA78113fD",
+              "lockbox_adapter": "0xB71D06f2e73918386B75c24dD26c95DD938f7912"
+          },
+          {
+              "contract_address": "0x0000000000000000000000000000000000000000",
+              "chain_id": 1,
+              "decimals": 6,
+              "symbol": "ARTY",
+              "xERC20": "0xD6b53a5718df3B5D40621D31Bbf1e955b66B3f75"
+          }
+      ],
+      "color": "#000000"
   }
 ]
