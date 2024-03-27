@@ -543,7 +543,7 @@
         "xERC20": "0x2416092f143378750bb29b79eD961ab195CcEea5",
         "lockbox": "0xC8140dA31E6bCa19b287cC35531c2212763C2059",
         "lockbox_adapter": "0x45bf3c737e57b059a5855280ca1adb8e9606ac68",
-        "lockbox_adapter_blast": "0xfd5dB5D9e9DD26fAC7b2B94080CFe89c9ee75749"
+        "lockbox_adapter_blast": "0xBE1a8Fe5CB3B7E50825Cef73aFDf29E3fc34DE33"
       },
       {
         "contract_address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
