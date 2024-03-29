@@ -52,5 +52,32 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "swapr",
+    "symbol": "SWPR",
+    "name": "Swapr",
+    "image": "/logos/assets/swpr.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xDaA06d9e9843f4D69FdD7E4Bd262f3DA6F822507",
+        "chain_id": 11155111,
+        "decimals": 18,
+        "symbol": "SWPR",
+        "xERC20": "0x535c70c9Bac2631CbFD769D3Ac07338233c5Df66",
+        "lockbox": "0x0b276A32d366923D8Bbe02293B3e3536A41C823B",
+        "lockbox_adapter": "0xcF021fCFB9bd72E5aA7ab390cFA4fCfDF895c7Cf"
+      },
+      {
+        "contract_address": "0xB27Da7650B3C82a1FF46d66bDF027a9007Ed8512",
+        "chain_id": 421614,
+        "decimals": 18,
+        "symbol": "SWPR",
+        "xERC20": "0x535c70c9Bac2631CbFD769D3Ac07338233c5Df66",
+        "lockbox": "0xf3D58415480A92C460e8EEa646C7234f8d9772f9",
+        "lockbox_adapter": "0x0f4Fe4903d01E0deb067A7297453fBEFdC36D189"
+      }
+    ]
   }
 ]
